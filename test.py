@@ -1,10 +1,9 @@
 import torch
 import math
-from torch.optim import Adam
 from pytorch_pretrained_bert import BertTokenizer, BertConfig, BertEmbeddings
 from pytorch_pretrained_bert import BertPreTrainedModel, BertModel
-from pytorch_pretrained_bert import BertForTokenClassification, BertAdam
-from tqdm import tqdm
+from flair.embeddings import BertEmbeddings as FlBertEmbeddings
+from flair.data import Sentence
 from typing import List
 
 
@@ -47,13 +46,11 @@ class BertPreTrainedEmbeddings(BertPreTrainedModel):
 
 
 def customEmbeddingTest():
-    tokenizer = BertTokenizer.from_pretrained('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
-    bertEmbedModel = BertPreTrainedEmbeddings.from_pretrained('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
     bertModel = BertModel.from_pretrained('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
+    bertModel.eval()
 
-    sortedWordSents = sorted(origWordSents, key=lambda e: len(e), reverse=True)
-    print(sortedWordSents)
-
+    # sortedWordSents = sorted(origWordSents, key=lambda e: len(e), reverse=True)
+    # print(sortedWordSents)
 
     tokenizedSents = [tokenizer.tokenize(sent) for sent in sortedWordSents]
     targetedWordIdxs = [sent.index('还') for sent in tokenizedSents]
@@ -65,42 +62,58 @@ def customEmbeddingTest():
 
     attentionMask = torch.tensor([[float(i > 0) for i in sent] for sent in paddedInputIds])
 
-    sentsEmbeds, _ = bertModel(paddedInputIds, attention_mask=None,
-                            output_all_encoded_layers=False)
-    print(targetedWordIdxs)
-    # print([wordIdxs[i][j] for i, j in enumerate(targetedWordIdxs)])
-    print(sortedWordSents[0])
-    print(tokenizedSents[0])
-    # print(sentsEmbeds[-1][targetedWordIdxs[-1]])
-    # print(sentsEmbeds[-3][targetedWordIdxs[-3]])
+    allLayerEmbeds, _ = bertModel(paddedInputIds, attention_mask=attentionMask,
+                                  output_all_encoded_layers=True)
 
-    v1 = -3
-    v2 = -1
-    print(sortedWordSents[v1])
-    print(sortedWordSents[v2])
-    print(cosineSimilarity(
-        sentsEmbeds[v1][targetedWordIdxs[v1]],
-        sentsEmbeds[v2][targetedWordIdxs[v2]]))
+    with torch.no_grad():
+        concatSentEmbeds = []
+        layerIdxs = [-1, -2, -3, -4]
+        for sentIdx, sent in enumerate(tokenizedSents):
+            selectedLayersForSent = []
+            for tokenIdx in range(len(sent)):
+                selectedLayersForToken = []
+                for layerIdx in layerIdxs:
+                    layerEmbeds = allLayerEmbeds[layerIdx].detach().cpu()[sentIdx]
+                    selectedLayersForToken.append(layerEmbeds[tokenIdx])
+                selectedLayersForSent.append(torch.cat(selectedLayersForToken))
+            concatSentEmbeds.append(selectedLayersForSent)
 
-from flair.embeddings import BertEmbeddings as FlBertEmbeddings
-from flair.data import Sentence
-
-embedding = FlBertEmbeddings('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
-
-sents = [Sentence(s) for s in origWordSents]
-print(sents)
-
-tokenizer = BertTokenizer.from_pretrained('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
-
-testSent = tokenizer.tokenize('劳动力还不够，必须再调一部分人过来。')
-print(testSent)
-
-s = Sentence()
-for w in testSent:
-    s.add_token(w)
-embeddedSents = embedding.embed(s)
+    return concatSentEmbeds
 
 
+def makeSentence(sent: str):
+    tokenizer.tokenize(sent)
+    s = Sentence()
+    for w in sent:
+        s.add_token(w)
+    return s
 
-# if __name__ == "__main__":
-#     main()
+
+def getEmbedOfChar(sent, char):
+    sent = makeSentence(sent)
+    for i, t in enumerate(sent):
+        if t.text == char:
+            charIdx = i
+            break
+    return embedding.embed(sent)[0][charIdx].embedding
+
+
+def cosSim(char, sent1, sent2):
+    embed1 = getEmbedOfChar(sent1, char)
+    embed2 = getEmbedOfChar(sent2, char)
+    # print(embed1)
+    # print(embed2)
+    return cosineSimilarity(embed1, embed2)
+
+
+def main():
+    global embedding, tokenizer, sortedWordSents
+    embedding = FlBertEmbeddings('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
+    tokenizer = BertTokenizer.from_pretrained('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
+    sortedWordSents = sorted(origWordSents, key=lambda e: len(e), reverse=True)
+
+    customEmbeddingTest()
+
+
+if __name__ == "__main__":
+    main()
