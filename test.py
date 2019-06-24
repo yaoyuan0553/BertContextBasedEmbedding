@@ -26,6 +26,8 @@ origWordSents = [
     "（这学期）他比你跑得还快了。",
 ]
 
+sortedWordSents = sorted(origWordSents, key=lambda e: len(e), reverse=True)
+
 
 class BertPreTrainedEmbeddings(BertPreTrainedModel):
     def __init__(self, config: BertConfig):
@@ -46,17 +48,22 @@ class BertPreTrainedEmbeddings(BertPreTrainedModel):
 
 
 def customEmbeddingTest():
+    global sortedWordSents
+
     bertModel = BertModel.from_pretrained('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
     bertModel.eval()
 
     # sortedWordSents = sorted(origWordSents, key=lambda e: len(e), reverse=True)
     # print(sortedWordSents)
+    # wordsSents = ["[CLS]" + sent + "[SEP]" for sent in origWordSents]
+    # print(wordsSents)
 
-    tokenizedSents = [tokenizer.tokenize(sent) for sent in sortedWordSents]
+    tokenizedSents = [["[CLS]"] + tokenizer.tokenize(sent) + ["[SEP]"] for sent in origWordSents]
     targetedWordIdxs = [sent.index('还') for sent in tokenizedSents]
     wordIdxs = [tokenizer.convert_tokens_to_ids(sent) for sent in tokenizedSents]
 
-    maxLen = len(wordIdxs[0])
+    #maxLen = len(wordIdxs[0])
+    maxLen = max([len(sent) for sent in wordIdxs])
     paddedInputIds = [sent + [0] * (maxLen - len(sent)) for sent in wordIdxs]
     paddedInputIds = torch.tensor(paddedInputIds)
 
@@ -76,13 +83,13 @@ def customEmbeddingTest():
                     layerEmbeds = allLayerEmbeds[layerIdx].detach().cpu()[sentIdx]
                     selectedLayersForToken.append(layerEmbeds[tokenIdx])
                 selectedLayersForSent.append(torch.cat(selectedLayersForToken))
-            concatSentEmbeds.append(selectedLayersForSent)
+            concatSentEmbeds.append(selectedLayersForSent[1:-1])
 
     return concatSentEmbeds
 
 
 def makeSentence(sent: str):
-    tokenizer.tokenize(sent)
+    sent = tokenizer.tokenize(sent)
     s = Sentence()
     for w in sent:
         s.add_token(w)
@@ -98,6 +105,19 @@ def getEmbedOfChar(sent, char):
     return embedding.embed(sent)[0][charIdx].embedding
 
 
+def getEmbedsOfChar(sents: List[str], char: str):
+    sents = [makeSentence(sent) for sent in sents]
+    charIdxs = []
+    for sent in sents:
+        for i, t in enumerate(sent):
+            if t.text == char:
+                charIdxs.append(i)
+                break
+
+    embeds = embedding.embed(sents)
+    return [embeds[i][charIdx].embedding for i, charIdx in enumerate(charIdxs)]
+
+
 def cosSim(char, sent1, sent2):
     embed1 = getEmbedOfChar(sent1, char)
     embed2 = getEmbedOfChar(sent2, char)
@@ -107,12 +127,12 @@ def cosSim(char, sent1, sent2):
 
 
 def main():
-    global embedding, tokenizer, sortedWordSents
+    global embedding, tokenizer
     embedding = FlBertEmbeddings('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
     tokenizer = BertTokenizer.from_pretrained('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
-    sortedWordSents = sorted(origWordSents, key=lambda e: len(e), reverse=True)
 
-    customEmbeddingTest()
+    # customEmbeddingTest()
+    getEmbedsOfChar(origWordSents, '还')
 
 
 if __name__ == "__main__":
