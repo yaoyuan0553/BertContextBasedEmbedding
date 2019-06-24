@@ -58,7 +58,9 @@ def customEmbeddingTest():
     # wordsSents = ["[CLS]" + sent + "[SEP]" for sent in origWordSents]
     # print(wordsSents)
 
-    tokenizedSents = [["[CLS]"] + tokenizer.tokenize(sent) + ["[SEP]"] for sent in origWordSents]
+    tokenizedSents = [tokenizer.tokenize(sent) for sent in origWordSents]
+    origSentsLens = [len(sent) for sent in tokenizedSents]
+    tokenizedSents = [["[CLS]"] + sent + ["[SEP]"] for sent in tokenizedSents]
     targetedWordIdxs = [sent.index('还') for sent in tokenizedSents]
     wordIdxs = [tokenizer.convert_tokens_to_ids(sent) for sent in tokenizedSents]
 
@@ -71,21 +73,22 @@ def customEmbeddingTest():
 
     allLayerEmbeds, _ = bertModel(paddedInputIds, attention_mask=attentionMask,
                                   output_all_encoded_layers=True)
-
     with torch.no_grad():
         concatSentEmbeds = []
         layerIdxs = [-1, -2, -3, -4]
         for sentIdx, sent in enumerate(tokenizedSents):
             selectedLayersForSent = []
-            for tokenIdx in range(len(sent)):
+            for tokenIdx in range(maxLen):
                 selectedLayersForToken = []
+                if tokenIdx == 0 or tokenIdx == origSentsLens[sentIdx] + 1:
+                    continue
                 for layerIdx in layerIdxs:
                     layerEmbeds = allLayerEmbeds[layerIdx].detach().cpu()[sentIdx]
                     selectedLayersForToken.append(layerEmbeds[tokenIdx])
                 selectedLayersForSent.append(torch.cat(selectedLayersForToken))
-            concatSentEmbeds.append(selectedLayersForSent[1:-1])
+            concatSentEmbeds.append(torch.stack(selectedLayersForSent))
 
-    return concatSentEmbeds
+    return torch.stack(concatSentEmbeds)
 
 
 def makeSentence(sent: str):
@@ -131,8 +134,8 @@ def main():
     embedding = FlBertEmbeddings('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
     tokenizer = BertTokenizer.from_pretrained('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
 
-    # customEmbeddingTest()
-    getEmbedsOfChar(origWordSents, '还')
+    customEmbeddingTest()
+    # getEmbedsOfChar(origWordSents, '还')
 
 
 if __name__ == "__main__":
