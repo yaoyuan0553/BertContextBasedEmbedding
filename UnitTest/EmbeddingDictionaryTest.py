@@ -1,9 +1,7 @@
 import BertEmbedder
 from EmbeddingDictionary import *
 
-BertEmbedder.BertEmbedderInit()
-BertEmbedder.bertEmbedder = BertEmbedder.BertEmbedder(
-    '/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
+BertEmbedder.BertEmbedderInit('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
 
 # 还-6-表示在某种程度之上有所增加或在某个范围之外有所补充-
 # 今天比昨天还冷。
@@ -30,4 +28,4 @@ embedDict.add(entry1)
 
 print(entry1)
 print(embedDict)
-
+print(entryKey1.isFull(), entryKey1.isEmpty())

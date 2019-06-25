@@ -27,11 +27,7 @@ class BertEmbedder(object):
     """
     Embedder class for embedding given sentences with BERT
     """
-    def __init__(
-            self,
-            bertModelOrPath: str = "bert-base-chinese",
-            layers: str = "-1, -2, -3, -4"
-    ):
+    def __init__(self, bertModelOrPath: str = "bert-base-chinese", layers: str = "-1, -2, -3, -4"):
         """
         constructs a BertEmbedder object
         :param bertModelOrPath: bert model string or path to a bert model
@@ -44,11 +40,11 @@ class BertEmbedder(object):
 
         self.model.eval()
 
-    def embed(self, sentences: Union[str, List[str]], char: Optional[str] = None):
+    def embed(self, sentences: Union[str, List[str]], word: Optional[str] = None):
         """
         Embed a given list of sentences with Bert
         :param (Union[str, List[str]) sentences: sentences to be embedded
-        :param (str) char: if given, only the embeddings of the given char
+        :param (str) word: if given, only the embeddings of the given word
             in each sentence will be returned
         :return (torch.Tensor): torch tensor of shape
             (number_of_sentences, max_sentence_length, bert_hidden_size)  if char is None
@@ -60,8 +56,15 @@ class BertEmbedder(object):
         tokenizedSents = [self.tokenizer.tokenize(sent) for sent in sentences]
         origSentsLens = [len(sent) for sent in tokenizedSents]
         tokenizedSents = [["[CLS]"] + sent + ["[SEP]"] for sent in tokenizedSents]
-        if char:
-            charIdxs = [sent.index(char) for sent in tokenizedSents]
+        if word:
+            wordLen = len(word)
+            if wordLen == 1:
+                wordIdxs = [sent.index(word) for sent in tokenizedSents]
+            else:
+                charList = [char for char in word]
+                wordIdxs = [i for sent in tokenizedSents for i in range(len(sent)-wordLen)
+                            if sent[i:i+wordLen] == charList]
+
         tokenIdxs = [self.tokenizer.convert_tokens_to_ids(sent) for sent in tokenizedSents]
 
         maxLen = max([len(sent) for sent in tokenIdxs])
@@ -76,12 +79,17 @@ class BertEmbedder(object):
             concatSentEmbeds = []
             for sentIdx, sent in enumerate(tokenizedSents):
                 selectedLayersForSent = []
-                if char:
-                    selectedLayersForToken = []
-                    for layerIdx in self.layerIdxs:
-                        layerEmbeds = allLayerEmbeds[layerIdx].detach().cpu()[sentIdx]
-                        selectedLayersForToken.append(layerEmbeds[charIdxs[sentIdx]])
-                    selectedLayersForSent.append(torch.cat(selectedLayersForToken))
+                if word:
+                    try:
+                        for tokenIdx in range(wordIdxs[sentIdx], wordIdxs[sentIdx] + len(word)):
+                            selectedLayersForToken = []
+                            for layerIdx in self.layerIdxs:
+                                layerEmbeds = allLayerEmbeds[layerIdx].detach().cpu()[sentIdx]
+                                selectedLayersForToken.append(layerEmbeds[tokenIdx])
+                            selectedLayersForSent.append(torch.cat(selectedLayersForToken))
+                    except IndexError:
+                        print(word)
+                        print(sentences)
                 else:
                     for tokenIdx in range(maxLen):
                         selectedLayersForToken = []
@@ -97,6 +105,6 @@ class BertEmbedder(object):
 
 
 # global variable to be initialized by main and used by other modules
-def BertEmbedderInit():
+def BertEmbedderInit(bertModelOrPath: str, layers: str = "-1,-2,-3,-4"):
     global bertEmbedder
-    bertEmbedder = None
+    bertEmbedder = BertEmbedder(bertModelOrPath, layers)

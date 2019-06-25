@@ -1,7 +1,7 @@
 import torch
 import sys
 
-from typing import List, Callable, Optional
+from typing import List, Callable, Optional, Tuple, Dict
 import BertEmbedder as be
 
 
@@ -32,14 +32,25 @@ class EntryValue(object):
 
 class EntryKey(object):
     def __init__(self, word: Optional[str] = None, category: Optional[str] = None):
+        """
+        constructs an EntryKey object
+        :param (Optional[str]) word: word to be stored & indexed with
+        :param (Optional[str]) category: category to be stored & indexed with
+        """
         self.word = word
         self.category = category
 
-    def isPartial(self):
-        return self.word or self.category
+    def isEmpty(self):
+        """
+        :return (bool): True if both fields are None, False otherwise
+        """
+        return self.word is None and self.category is None
 
     def isFull(self):
-        return self.word and self.category
+        """
+        :return (bool): True if both fields are filled, False otherwise
+        """
+        return self.word is not None and self.category is not None
 
     def __str__(self):
         return "EntryKey(word: %s, category: %s)" % (self.word, self.category)
@@ -50,6 +61,11 @@ class EntryKey(object):
 
 class Entry(object):
     def __init__(self, entryKey: EntryKey, entryValue: EntryValue):
+        """
+        constructs an Entry object
+        :param (EntryKey) entryKey: entry key
+        :param (EntryValue) entryValue: entry value
+        """
         self.key = entryKey
         self.value = entryValue
 
@@ -59,6 +75,9 @@ class Entry(object):
 
 class EmbeddingDictionary(object):
     def __init__(self):
+        """
+        initializes an EmbeddingDictionary
+        """
         self.wordEntries = dict()
         self.categoryEntries = dict()
 
@@ -68,7 +87,7 @@ class EmbeddingDictionary(object):
         :param (Entry) entry: vocab entry to be added to the dictionary
         """
         if entry.key in self:
-            print('Duplicate key [%s]', entry.key, file=sys.stderr)
+            print('Duplicate key [%s]' % entry.key, file=sys.stderr)
             return
 
         if entry.key.category not in self.categoryEntries.keys():
@@ -83,8 +102,14 @@ class EmbeddingDictionary(object):
         raise ValueError('forbidden to change existing entries!')
 
     def __getitem__(self, item: EntryKey):
-        if item.category is None and item.word is None:
-            raise KeyError("EntryKey cannot be None!")
+        """
+        :param (EntryKey) item: lookup with key and returns an EntryValue
+        :return (Union[EntryValue, Dict[str, EntryValue]]): returns a single EntryValue
+            if it's a full-lookup (EntryKey is fully filled). Otherwise, returns a dictionary
+            of either category or word as keys and EntryValue as values
+        """
+        if item.isEmpty():
+            raise KeyError("EntryKey cannot be empty!")
         if item.category is None:
             return self.word[item.word]
         if item.word is None:
@@ -96,8 +121,8 @@ class EmbeddingDictionary(object):
                (len(self.word.keys()), len(self.category.keys()))
 
     def __contains__(self, item: EntryKey):
-        if item.category is None and item.word is None:
-            raise KeyError("EntryKey cannot be None!")
+        if item.isEmpty():
+            raise KeyError("EntryKey cannot be empty!")
         if item.category is None:
             return item.word in self.word
         if item.word is None:
@@ -113,10 +138,36 @@ class EmbeddingDictionary(object):
         return self.wordEntries
 
     def similarity(self, key1: EntryKey, key2: EntryKey, similarityFunc: Callable):
-        return similarityFunc(self.word[key1.word][key1.category].embedding,
-                              self.word[key2.word][key2.category].embedding)
+        if not key1.isFull() or not key2.isFull():
+            raise KeyError("EntryKeys must be full (both word and category provided)")
 
-    def topNsimilarity(self, n: int, key: EntryKey, similarityFunc: Callable):
+        return similarityFunc(self[key1].embedding, self[key2].embedding)
+
+    def getWordSimilarityInCategory(self, key: EntryKey, similarityFunc: Callable):
+        if not key.isFull():
+            raise KeyError("EntryKey must be fully set!")
+        val: EntryValue = self[key]
+        otherVals: List[Tuple[str, EntryValue]] = \
+            [(w, v) for w, v in self.category[key.category].items() if w != self.word]
+        return [(w, similarityFunc(val.embedding, v.embedding)) for w, v in otherVals]
+
+    def getWordSimilarity(self, key: EntryKey, similarityFunc: Callable):
         if key.word is None:
             raise KeyError("EntryKey.word value must be set!")
-        sims = []
+        simsByCategory: Dict[str, List[Tuple[str, EntryValue]]] = dict()
+        if key.category:
+            simsByCategory[key.category] = self.getWordSimilarityInCategory(key, similarityFunc)
+        else:
+            categories = self[key]
+            for cat in categories:
+                simsByCategory[categories] = \
+                    self.getWordSimilarityInCategory(EntryKey(key.word, cat), similarityFunc)
+        return simsByCategory
+
+    def getTopNWordSimilarity(self, n: int, key: EntryKey, similarityFunc: Callable):
+        simsByCategory = self.getWordSimilarity(key, similarityFunc)
+        for cat, sims in simsByCategory.items():
+            simsByCategory[cat] = sorted(sims, key=lambda e: e[1], reverse=True)[:n]
+
+        return simsByCategory
+
