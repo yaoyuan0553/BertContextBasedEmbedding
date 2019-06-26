@@ -1,6 +1,7 @@
 import torch
 import pytorch_pretrained_bert as ppb
 from typing import Union, List, Optional, Callable
+from Embedder import Embedder
 
 
 class BertTokenizer(ppb.BertTokenizer):
@@ -23,7 +24,7 @@ class BertTokenizer(ppb.BertTokenizer):
         return ids
 
 
-class BertEmbedder(object):
+class BertEmbedder(Embedder):
     """
     Embedder class for embedding given sentences with BERT
     """

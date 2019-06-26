@@ -25,12 +25,16 @@ class EmbeddingDictionaryLoader(object):
                 try:
                     w, n, exp, egs = l.split('-')
                     egs = egs.split('+')
+                    propIdx = egs[-1].find('[')
+                    prop = egs[-1][propIdx:]
+                    egs[-1] = egs[-1][:propIdx]
+
                 except ValueError:  # skip cases with wrong format
                     continue
                 if curCategory is None:
                     raise ValueError("Current Category not found in file!")
                 try:
-                    entry = Entry(EntryKey(w, curCategory), EntryValue(w, int(n), exp, egs))
+                    entry = Entry(EntryKey(w, curCategory), EntryValue(w, int(n), exp, egs, prop))
                 # TODO: deal with unexpected inputs
                 except Exception:
                     continue    # skip this line if an error happened

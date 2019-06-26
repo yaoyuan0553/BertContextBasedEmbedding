@@ -2,16 +2,18 @@ import torch
 import sys
 
 from typing import List, Callable, Optional, Tuple, Dict
-import BertEmbedder as be
+import Embedder as eb
+from BertEmbedder import BertEmbedder
 
 
-class EmbedPoolingConfig(object):
+class EmbeddingConfig(object):
     """
-    configuration variables for embedding pooling in EntryValue;
+    configuration variables for embedding and pooling in EntryValue;
     must be modified before initializing an EntryValue
     """
     WordPoolingMethod: Callable = torch.mean
     SentencePoolingMethod: Callable = torch.mean
+    DefaultEmbedder: eb.Embedder = eb.Embedder()
 
 
 def PoolWord(t: torch.Tensor, dim: int):
@@ -21,7 +23,7 @@ def PoolWord(t: torch.Tensor, dim: int):
     :param (int) dim: dimension of characters to be pooled over
     :return torch.Tensor: aggregated embedding of the word (character dimension will be discarded)
     """
-    return EmbedPoolingConfig.WordPoolingMethod(t, dim=dim)
+    return EmbeddingConfig.WordPoolingMethod(t, dim=dim)
 
 
 def PoolSentence(t: torch.Tensor, dim):
@@ -31,25 +33,28 @@ def PoolSentence(t: torch.Tensor, dim):
     :param (int) dim: dimension of characters to be pooled over
     :return torch.Tensor: aggregated embedding of the word (character dimension will be discarded)
     """
-    return EmbedPoolingConfig.SentencePoolingMethod(t, dim=dim)
+    return EmbeddingConfig.SentencePoolingMethod(t, dim=dim)
 
 
 class EntryValue(object):
     """
     class containing properties of a given word of a specific category (including embedding)
     """
-    def __init__(self, word: str, nCats: int, exp: str, egs: List[str]):
+    def __init__(self, word: str, nCats: int, exp: str, egs: List[str], prop: Optional[str] = None):
         """
         constructs an EntryValue object
-        :param word: word of the entry
-        :param nCats: number of categories the word belongs to (polysemy)
-        :param exp: explanation of the word
-        :param egs: sample sentences that belong to this sense of the word
+        :param (str) word: word of the entry
+        :param (int) nCats: number of categories the word belongs to (polysemy)
+        :param (str) exp: explanation of the word
+        :param (List[str]) egs: sample sentences that belong to this sense of the word
+        :param (Optional[str]) prop: property (part of speech) of the word
         """
         self.nCategory = nCats
         self.explanation = exp
         self.examples = egs
-        self.embedding: torch.Tensor = PoolSentence(PoolWord(be.bertEmbedder.embed(egs, word), dim=1), dim=0)
+        self.property = prop
+        self.embedding: torch.Tensor = PoolSentence(
+            PoolWord(EmbeddingConfig.DefaultEmbedder.embed(egs, word), dim=1), dim=0)
 
     def __repr__(self):
         return str(self)
@@ -222,8 +227,8 @@ class EmbeddingDictionary(object):
             simsByCategory[key.category] = self.getWordSimilarityInCategory(key, similarityFunc)
         else:
             categories = self[key]
-            for cat in categories:
-                simsByCategory[categories] = \
+            for cat in categories.keys():
+                simsByCategory[cat] = \
                     self.getWordSimilarityInCategory(EntryKey(key.word, cat), similarityFunc)
         return simsByCategory
 
