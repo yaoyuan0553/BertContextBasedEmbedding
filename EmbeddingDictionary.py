@@ -5,6 +5,35 @@ from typing import List, Callable, Optional, Tuple, Dict
 import BertEmbedder as be
 
 
+class EmbedPoolingConfig(object):
+    """
+    configuration variables for embedding pooling in EntryValue;
+    must be modified before initializing an EntryValue
+    """
+    WordPoolingMethod: Callable = torch.mean
+    SentencePoolingMethod: Callable = torch.mean
+
+
+def PoolWord(t: torch.Tensor, dim: int):
+    """
+    Method to aggregate embeddings of a multi-character word into one
+    :param (torch.Tensor) t: torch tensor containing embeddings of characters
+    :param (int) dim: dimension of characters to be pooled over
+    :return torch.Tensor: aggregated embedding of the word (character dimension will be discarded)
+    """
+    return EmbedPoolingConfig.WordPoolingMethod(t, dim=dim)
+
+
+def PoolSentence(t: torch.Tensor, dim):
+    """
+    Method to aggregate embeddings of a given word within multiple sentences
+    :param (torch.Tensor) t: torch tensor containing embeddings of characters
+    :param (int) dim: dimension of characters to be pooled over
+    :return torch.Tensor: aggregated embedding of the word (character dimension will be discarded)
+    """
+    return EmbedPoolingConfig.SentencePoolingMethod(t, dim=dim)
+
+
 class EntryValue(object):
     """
     class containing properties of a given word of a specific category (including embedding)
@@ -20,14 +49,14 @@ class EntryValue(object):
         self.nCategory = nCats
         self.explanation = exp
         self.examples = egs
-        self.embedding: torch.Tensor = be.bertEmbedder.embed(egs, word)
+        self.embedding: torch.Tensor = PoolSentence(PoolWord(be.bertEmbedder.embed(egs, word), dim=1), dim=0)
 
     def __repr__(self):
         return str(self)
 
     def __str__(self):
-        return "EntryValue(%d, \"%s\", %s, %s)" % \
-               (self.nCategory, self.explanation, self.examples, self.embedding.shape)
+        return "EntryValue(%s, \"%s\", %s, %s)" % \
+               (str(self.nCategory), self.explanation, self.examples, self.embedding.shape)
 
 
 class EntryKey(object):
@@ -121,37 +150,71 @@ class EmbeddingDictionary(object):
                (len(self.word.keys()), len(self.category.keys()))
 
     def __contains__(self, item: EntryKey):
+        """
+        check whether not an EntryKey exists within the dictionary
+        :param (EntryKey) item: item to be checked
+        :return (bool): True or False
+        """
         if item.isEmpty():
             raise KeyError("EntryKey cannot be empty!")
         if item.category is None:
             return item.word in self.word
         if item.word is None:
             return item.category in self.category
-        return item.word in self.word and item.category in self.category
+        return item.word in self.word and item.category in self.word[item.word]
 
     @property
     def category(self):
+        """
+        name alias for categoryEntries
+        :return:
+        """
         return self.categoryEntries
 
     @property
     def word(self):
+        """
+        name alias for wordEntries
+        :return:
+        """
         return self.wordEntries
 
     def similarity(self, key1: EntryKey, key2: EntryKey, similarityFunc: Callable):
+        """
+        computes similarity score of two entries
+        :param (EntryKey) key1:
+        :param (EntryKey) key2:
+        :param Callable similarityFunc:
+        :return (Container[float]): similarity score
+        """
         if not key1.isFull() or not key2.isFull():
             raise KeyError("EntryKeys must be full (both word and category provided)")
 
         return similarityFunc(self[key1].embedding, self[key2].embedding)
 
     def getWordSimilarityInCategory(self, key: EntryKey, similarityFunc: Callable):
+        """
+        computes similarity score between given key.word and all other words within
+        the same category
+        :param (EntryKey) key:
+        :param (Callable) similarityFunc:
+        :return (List[Container[float]]): list of similarity scores
+        """
         if not key.isFull():
             raise KeyError("EntryKey must be fully set!")
         val: EntryValue = self[key]
         otherVals: List[Tuple[str, EntryValue]] = \
-            [(w, v) for w, v in self.category[key.category].items() if w != self.word]
+            [(w, v) for w, v in self.category[key.category].items() if w != key.word]
         return [(w, similarityFunc(val.embedding, v.embedding)) for w, v in otherVals]
 
     def getWordSimilarity(self, key: EntryKey, similarityFunc: Callable):
+        """
+        computes similarity score between key.word and all other words spanning all
+        categories that key.word is in
+        :param (EntryKey) key:
+        :param (Callable) similarityFunc:
+        :return (Dict[str, List[Container[float]]]):
+        """
         if key.word is None:
             raise KeyError("EntryKey.word value must be set!")
         simsByCategory: Dict[str, List[Tuple[str, EntryValue]]] = dict()
@@ -165,6 +228,15 @@ class EmbeddingDictionary(object):
         return simsByCategory
 
     def getTopNWordSimilarity(self, n: int, key: EntryKey, similarityFunc: Callable):
+        """
+        computes similarity score with getWordSimilarity function and pick the top N
+        words with the highest similarity score
+        :param (int) n:
+        :param (EntryKey) key:
+        :param (Callable) similarityFunc:
+        :return (Dict[str, List[Container[float]]]): sorted top N words with
+            high similarity score for each category
+        """
         simsByCategory = self.getWordSimilarity(key, similarityFunc)
         for cat, sims in simsByCategory.items():
             simsByCategory[cat] = sorted(sims, key=lambda e: e[1], reverse=True)[:n]

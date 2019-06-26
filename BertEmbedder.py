@@ -1,6 +1,6 @@
 import torch
 import pytorch_pretrained_bert as ppb
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Callable
 
 
 class BertTokenizer(ppb.BertTokenizer):
@@ -27,7 +27,10 @@ class BertEmbedder(object):
     """
     Embedder class for embedding given sentences with BERT
     """
-    def __init__(self, bertModelOrPath: str = "bert-base-chinese", layers: str = "-1, -2, -3, -4"):
+    def __init__(
+            self, bertModelOrPath: str = "bert-base-chinese",
+            layers: str = "-1, -2, -3, -4",
+    ):
         """
         constructs a BertEmbedder object
         :param bertModelOrPath: bert model string or path to a bert model
@@ -47,8 +50,8 @@ class BertEmbedder(object):
         :param (str) word: if given, only the embeddings of the given word
             in each sentence will be returned
         :return (torch.Tensor): torch tensor of shape
-            (number_of_sentences, max_sentence_length, bert_hidden_size)  if char is None
-            (number_of_sentences, 1, bert_hidden_size) if char is given
+            (number_of_sentences, max_sentence_length, bert_hidden_size)  if word is None
+            (number_of_sentences, 1, bert_hidden_size) if word is given
         """
         if isinstance(sentences, str):
             sentences = [sentences]
@@ -106,5 +109,10 @@ class BertEmbedder(object):
 
 # global variable to be initialized by main and used by other modules
 def BertEmbedderInit(bertModelOrPath: str, layers: str = "-1,-2,-3,-4"):
+    """
+    initializes a BertEmbedder global object to be used by others
+    :param (str) bertModelOrPath:
+    :param (str) layers:
+    """
     global bertEmbedder
     bertEmbedder = BertEmbedder(bertModelOrPath, layers)
