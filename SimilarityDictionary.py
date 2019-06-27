@@ -1,7 +1,8 @@
 import torch
 import sys
 
-from typing import List, Callable, Optional, Tuple, Dict
+from typing import List, Callable, Optional, Tuple, Sequence
+from collections import UserDict, UserList
 import Embedder as eb
 from BertEmbedder import BertEmbedder
 
@@ -107,10 +108,72 @@ class Entry(object):
         return "Entry[%s] = %s" % (self.key, self.value)
 
 
-class EmbeddingDictionary(object):
+class WordSimilarity(object):
+    def __init__(self, word: str, similarityScore: float):
+        if not isinstance(word, str) or not isinstance(similarityScore, float):
+            raise TypeError('WordSimilarity expects (str, float), but got (%s, %s)' % \
+                            (type(word), type(similarityScore)))
+        self._word = word
+        self._similarityScore = similarityScore
+
+    @property
+    def word(self):
+        return self._word
+
+    @property
+    def similarity(self):
+        return self._similarityScore * 100
+
+    def __str__(self):
+        return "\"%s\": %.2f%%" % (self.word, self.similarity)
+
+    def __repr__(self):
+        return "WordSimilarity(%s, %.2f)" % (self.word, self._similarityScore)
+
+
+class WordSimilarityList(UserList):
+    def __init__(self, data: Optional[Sequence] = None):
+        super().__init__(data)
+
+    def sortBySimilarity(self, reverse=False) -> None:
+        self.data = sorted(self.data, key=lambda e: e.similarity, reverse=reverse)
+
+    def sortByWord(self, reverse=False):
+        self.data = sorted(self.data, key=lambda e: e.word, reverse=reverse)
+
+    def __str__(self):
+        ret = ""
+        for i, ws in enumerate(self):
+            if not isinstance(ws, WordSimilarity):
+                raise TypeError('WordSimilarityList expects element type WordSimilarity, '
+                                'but got %s' % type(ws))
+            ret += "%d. %s\n" % (i+1, ws)
+        ret = ret[:-1]
+        return ret
+
+    def __repr__(self):
+        return 'WordSimilarityList(%s)' % super().__repr__()
+
+
+class SimilarityRankingDict(UserDict):
+    def __setitem__(self, key: str, value: WordSimilarityList):
+        if not isinstance(key, str) or not isinstance(value, WordSimilarityList):
+            raise TypeError('SimilarityRanking expects (key, value) type: '
+                            '(str, WordSimilarityList), '
+                            'but got type: (%s, %s)' % (type(key), type(value)))
+        super().__setitem__(key, value)
+
+    def __str__(self):
+        ret = ""
+        for key in self.keys():
+            ret += "%s:\n\t%s\n" % (key, '\n\t'.join(str(self[key]).splitlines()))
+        return ret[:-1]
+
+
+class SimilarityDictionary(object):
     def __init__(self):
         """
-        initializes an EmbeddingDictionary
+        initializes an SimilarityDictionary
         """
         self.wordEntries = dict()
         self.categoryEntries = dict()
@@ -148,6 +211,8 @@ class EmbeddingDictionary(object):
             return self.word[item.word]
         if item.word is None:
             return self.category[item.category]
+        if item not in self:
+            raise KeyError('%s not found!' % item)
         return self.category[item.category][item.word]
 
     def __repr__(self):
@@ -210,7 +275,9 @@ class EmbeddingDictionary(object):
         val: EntryValue = self[key]
         otherVals: List[Tuple[str, EntryValue]] = \
             [(w, v) for w, v in self.category[key.category].items() if w != key.word]
-        return [(w, similarityFunc(val.embedding, v.embedding)) for w, v in otherVals]
+        return WordSimilarityList(
+            [WordSimilarity(w, similarityFunc(val.embedding, v.embedding).item())
+                for w, v in otherVals])
 
     def getWordSimilarity(self, key: EntryKey, similarityFunc: Callable):
         """
@@ -222,7 +289,7 @@ class EmbeddingDictionary(object):
         """
         if key.word is None:
             raise KeyError("EntryKey.word value must be set!")
-        simsByCategory: Dict[str, List[Tuple[str, EntryValue]]] = dict()
+        simsByCategory: SimilarityRankingDict = SimilarityRankingDict()
         if key.category:
             simsByCategory[key.category] = self.getWordSimilarityInCategory(key, similarityFunc)
         else:
@@ -242,9 +309,10 @@ class EmbeddingDictionary(object):
         :return (Dict[str, List[Container[float]]]): sorted top N words with
             high similarity score for each category
         """
-        simsByCategory = self.getWordSimilarity(key, similarityFunc)
-        for cat, sims in simsByCategory.items():
-            simsByCategory[cat] = sorted(sims, key=lambda e: e[1], reverse=True)[:n]
+        simsByCategory: SimilarityRankingDict = self.getWordSimilarity(key, similarityFunc)
+        for sims in simsByCategory.values():
+            sims.sortBySimilarity(reverse=True)
+            # simsByCategory[cat] = sorted(sims, key=lambda e: e[1], reverse=True)[:n]
 
         return simsByCategory
 

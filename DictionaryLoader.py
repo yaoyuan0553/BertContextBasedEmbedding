@@ -1,11 +1,11 @@
-from EmbeddingDictionary import *
+from SimilarityDictionary import *
 
 
-class EmbeddingDictionaryLoader(object):
-    def __init__(self, embedDict: EmbeddingDictionary):
+class DictionaryLoader(object):
+    def __init__(self, embedDict: SimilarityDictionary):
         """
         constructs a loader
-        :param (EmbeddingDictionary) embedDict: saved for later use
+        :param (SimilarityDictionary) embedDict: saved for later use
         """
         self.embedDict = embedDict
 

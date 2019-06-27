@@ -1,3 +1,4 @@
+import sys
 import torch
 import pytorch_pretrained_bert as ppb
 from typing import Union, List, Optional, Callable
@@ -63,7 +64,11 @@ class BertEmbedder(Embedder):
         if word:
             wordLen = len(word)
             if wordLen == 1:
-                wordIdxs = [sent.index(word) for sent in tokenizedSents]
+                try:
+                    wordIdxs = [sent.index(word) for sent in tokenizedSents]
+                except ValueError:
+                    print(word, file=sys.stderr)
+                    print(sentences, file=sys.stderr)
             else:
                 charList = [char for char in word]
                 wordIdxs = [i for sent in tokenizedSents for i in range(len(sent)-wordLen)
@@ -92,8 +97,8 @@ class BertEmbedder(Embedder):
                                 selectedLayersForToken.append(layerEmbeds[tokenIdx])
                             selectedLayersForSent.append(torch.cat(selectedLayersForToken))
                     except IndexError:
-                        print(word)
-                        print(sentences)
+                        print(word, file=sys.stderr)
+                        print(sentences, file=sys.stderr)
                 else:
                     for tokenIdx in range(maxLen):
                         selectedLayersForToken = []
