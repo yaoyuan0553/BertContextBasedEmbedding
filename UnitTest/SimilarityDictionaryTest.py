@@ -1,5 +1,5 @@
 import BertEmbedder
-from SimilarityDictionary import *
+from EmbeddingDictionary import *
 
 BertEmbedder.BertEmbedderInit('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
 
@@ -23,7 +23,7 @@ entryValue1 = EntryValue("还", 6, "表示在某种程度之上有所增加或�
 entryKey1 = EntryKey("还", "#11程度深")
 entry1 = Entry(entryKey1, entryValue1)
 
-embedDict = SimilarityDictionary()
+embedDict = EmbeddingDictionary()
 embedDict.add(entry1)
 
 print(entry1)

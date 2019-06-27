@@ -1,7 +1,7 @@
 import math
 from BertEmbedder import BertEmbedder
 from DictionaryLoader import DictionaryLoader
-from SimilarityDictionary import *
+from EmbeddingDictionary import *
 
 # BertEmbedder.BertEmbedderInit('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
 
@@ -15,7 +15,7 @@ def cosineSimilarity(v1, v2):
     return dotProduct / magnitude
 
 
-# embedDict = SimilarityDictionary()
+# embedDict = EmbeddingDictionary()
 #
 # loader = DictionaryLoader(embedDict)
 #

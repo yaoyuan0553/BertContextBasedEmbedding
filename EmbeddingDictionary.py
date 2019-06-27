@@ -141,15 +141,35 @@ class WordSimilarityList(UserList):
     def sortByWord(self, reverse=False):
         self.data = sorted(self.data, key=lambda e: e.word, reverse=reverse)
 
-    def __str__(self):
+    def stringify(self, strFormat: str, start: Optional[int] = None, end: Optional[int] = None):
+        """
+        stringify the list in given format and range [start, end)
+        :param (str) strFormat: format to print each element
+        :param (int) start: start index of element to be printed (inclusive)
+        :param (int) end: end index of element to be printed (exclusive)
+        :return (str): stringified list
+        """
+        start = 0 if start is None else start
+        end = len(self) if end is None else end
         ret = ""
-        for i, ws in enumerate(self):
-            if not isinstance(ws, WordSimilarity):
+        for i in range(start, start + end):
+            if not isinstance(self[i], WordSimilarity):
                 raise TypeError('WordSimilarityList expects element type WordSimilarity, '
-                                'but got %s' % type(ws))
-            ret += "%d. %s\n" % (i+1, ws)
-        ret = ret[:-1]
+                                'but got %s' % type(self[i]))
+            ret += strFormat % (i+1, self[i])
+        ret = ret[:-1]  # ignore the additional ending format
         return ret
+
+    def __str__(self):
+        return self.stringify("%d. %s")
+        # ret = ""
+        # for i, ws in enumerate(self):
+        #     if not isinstance(ws, WordSimilarity):
+        #         raise TypeError('WordSimilarityList expects element type WordSimilarity, '
+        #                         'but got %s' % type(ws))
+        #     ret += "%d. %s\n" % (i+1, ws)
+        # ret = ret[:-1]
+        # return ret
 
     def __repr__(self):
         return 'WordSimilarityList(%s)' % super().__repr__()
@@ -166,14 +186,15 @@ class SimilarityRankingDict(UserDict):
     def __str__(self):
         ret = ""
         for key in self.keys():
-            ret += "%s:\n\t%s\n" % (key, '\n\t'.join(str(self[key]).splitlines()))
+            # ret += "%s:\n\t%s\n" % (key, '\n\t'.join(str(self[key]).splitlines()))
+            ret += "%s:\n%s\n" % (key, self[key].stringify('\t%d. %s\n'))
         return ret[:-1]
 
 
-class SimilarityDictionary(object):
+class EmbeddingDictionary(object):
     def __init__(self):
         """
-        initializes an SimilarityDictionary
+        initializes an EmbeddingDictionary
         """
         self.wordEntries = dict()
         self.categoryEntries = dict()
@@ -299,7 +320,7 @@ class SimilarityDictionary(object):
                     self.getWordSimilarityInCategory(EntryKey(key.word, cat), similarityFunc)
         return simsByCategory
 
-    def getTopNWordSimilarity(self, n: int, key: EntryKey, similarityFunc: Callable):
+    def getOrderedSimilarityForWord(self, key: EntryKey, similarityFunc: Callable):
         """
         computes similarity score with getWordSimilarity function and pick the top N
         words with the highest similarity score

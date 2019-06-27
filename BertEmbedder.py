@@ -114,11 +114,11 @@ class BertEmbedder(Embedder):
 
 
 # global variable to be initialized by main and used by other modules
-def BertEmbedderInit(bertModelOrPath: str, layers: str = "-1,-2,-3,-4"):
-    """
-    initializes a BertEmbedder global object to be used by others
-    :param (str) bertModelOrPath:
-    :param (str) layers:
-    """
-    global bertEmbedder
-    bertEmbedder = BertEmbedder(bertModelOrPath, layers)
+# def BertEmbedderInit(bertModelOrPath: str, layers: str = "-1,-2,-3,-4"):
+#     """
+#     initializes a BertEmbedder global object to be used by others
+#     :param (str) bertModelOrPath:
+#     :param (str) layers:
+#     """
+#     global bertEmbedder
+#     bertEmbedder = BertEmbedder(bertModelOrPath, layers)

@@ -16,7 +16,7 @@ import SimilarityFunction as sf
 
 from docopt import docopt
 from BertEmbedder import BertEmbedder
-from SimilarityDictionary import *
+from EmbeddingDictionary import *
 from DictionaryLoader import DictionaryLoader
 
 
@@ -25,7 +25,7 @@ def main():
     EmbeddingConfig.DefaultEmbedder = BertEmbedder(args['--bert-src'], args['--layers'])
 
     # construct and load dictionary
-    embedDict = SimilarityDictionary()
+    embedDict = EmbeddingDictionary()
     loader = DictionaryLoader(embedDict)
     loader.load(args['--dict-src'])
 
@@ -50,7 +50,7 @@ def main():
                     print('wrong request format!', file=sys.stderr)
                     continue
                 try:
-                    sims = embedDict.getTopNWordSimilarity(int(wc[0]), key, sf.cosineSimilarity)
+                    sims = embedDict.getOrderedSimilarityForWord(key, sf.cosineSimilarity)
                 except KeyError:
                     print(sys.exc_info()[1])
                     continue
