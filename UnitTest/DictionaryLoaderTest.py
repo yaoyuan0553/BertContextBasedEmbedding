@@ -3,6 +3,7 @@ from BertEmbedder import BertEmbedder
 from DictionaryLoader import DictionaryLoader
 from EmbeddingDictionary import *
 import numpy as np
+from SimilarityDictionary import *
 
 # BertEmbedder.BertEmbedderInit('/media/yuan/Samsung_T5/Documents/BERT/bert-base-chinese')
 
@@ -34,12 +35,11 @@ ws2 = WordSimilarity('嘿嘿', 0.3)
 print(ws1)
 print(ws2)
 
-wsl = WordSimilarityList()
+wsl = WordSimilarityList([ws1, ws2])
 # wsl.append(ws1)
-wsl = np.append(wsl, ws1)
+# wsl = np.append(wsl, ws1)
 
-wsl = np.append(wsl, ws2)
+# wsl = np.append(wsl, ws2)
 
-rankDict = SimilarityDictionary()
-rankDict['blah'] = wsl
-print(rankDict)
+# rankDict['blah'] = wsl
+# print(rankDict)

@@ -16,8 +16,10 @@ import SimilarityFunction as sf
 
 from docopt import docopt
 from BertEmbedder import BertEmbedder
-from EmbeddingDictionary import *
+from EmbeddingDictionary import EmbeddingDictionary, EntryKey, EmbeddingConfig
 from DictionaryLoader import DictionaryLoader
+from SimilarityFunction import cosineSimilarity
+from SimilarityDictionary import SimilarityDictionary
 
 
 def main():
@@ -28,11 +30,14 @@ def main():
     embedDict = EmbeddingDictionary()
     loader = DictionaryLoader(embedDict)
     loader.load(args['--dict-src'])
+    simDict = SimilarityDictionary(embedDict, cosineSimilarity)
 
     print("Dictionary loaded: %s" % embedDict)
 
     helpMsg = 'Help:\n\t-h, --help\t\tshow this help message\n' \
         '\texit, quit\t\texit program'
+    initialHelp = 'Enter -h or --help for additional help'
+    print(initialHelp)
     while True:
         try:
             request = input('Request format: <N> <word> [category]: ')
@@ -50,7 +55,8 @@ def main():
                     print('wrong request format!', file=sys.stderr)
                     continue
                 try:
-                    sims = embedDict.getOrderedSimilarityForWord(key, sf.cosineSimilarity)
+                    sims = simDict.rankedSimilarity(key, top=int(wc[0]))
+                    # sims = embedDict.getOrderedSimilarityForWord(key, sf.cosineSimilarity)
                 except KeyError:
                     print(sys.exc_info()[1])
                     continue

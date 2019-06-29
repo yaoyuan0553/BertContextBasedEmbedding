@@ -3,6 +3,9 @@ from typing import Union, List
 
 
 class Embedder(object):
+    """
+    an abstract class all other embedders should inherit
+    """
     def __init__(self):
         pass
 
