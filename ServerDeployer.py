@@ -15,34 +15,49 @@ import sys
 import json
 
 from docopt import docopt
-from flask import Flask
-from flask import request
+from flask import Flask, request
+from flask_cors import CORS
 from EmbeddingDictionary import EmbeddingConfig, EmbeddingDictionary, EntryKey
 from DictionaryLoader import DictionaryLoader
 from BertEmbedder import BertEmbedder
 from SimilarityDictionary import SimilarityDictionary
 from SimilarityFunction import cosineSimilarity
+from Jsonifiable import JsonifiableEncoder
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/similarity_ranker": {"origins": "*"}})
 
 
 @app.route("/similarity_ranker", methods=["POST"])
 def main():
+    response = dict()
     try:
         requestedJson = request.get_json()
         if not requestedJson:
             return "Invalid Requested Data"
-        n = requestedJson.get("n")
-        word = requestedJson.get("word")
-        category = requestedJson.get("category")
-        entryKey = EntryKey(word, category)
+        requestInfo = requestedJson['request_info']
     except Exception:
         return "Invalid Requested Data"
     try:
-        simRanks = simDict.rankedSimilarity(entryKey, top=n)
-        response = json.dumps({
-            "sim_ranks": str(simRanks)
-        }, ensure_ascii=False).encode('utf-8')
+        if requestInfo:
+            response['info'] = dict()
+            response['info']['words'] = list(embedDict.word.keys())
+            response['info']['categories'] = list(embedDict.category.keys())
+
+        else:
+            entryKey = EntryKey.fromJSON(requestedJson)
+            n = requestedJson.get("n")
+            n = None if n == "null" else n
+            simRanks = simDict.rankedSimilarity(entryKey, top=n)
+
+            response['sim_ranks'] = simRanks
+
+        response = json.dumps(response, ensure_ascii=False,
+                              cls=JsonifiableEncoder).encode('utf-8')
+
+        # response = json.dumps({
+        #     "sim_ranks": str(simRanks)
+        # }, ensure_ascii=False).encode('utf-8')
         # print(simRanks)
     except (KeyError, ValueError) as e:
         response = json.dumps({"error": "%s" % sys.exc_info()[1]})
