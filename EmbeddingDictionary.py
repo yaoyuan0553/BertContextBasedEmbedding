@@ -3,6 +3,7 @@ import torch
 
 from typing import List, Callable, Optional
 import Embedder as eb
+from Jsonifiable import JsonEncodable, JsonDecodable
 
 
 class EmbeddingConfig(object):
@@ -35,7 +36,7 @@ def PoolSentence(t: torch.Tensor, dim):
     return EmbeddingConfig.SentencePoolingMethod(t, dim=dim)
 
 
-class EntryValue(object):
+class EntryValue(JsonEncodable):
     """
     class containing properties of a given word of a specific category (including embedding)
     """
@@ -63,7 +64,7 @@ class EntryValue(object):
                (str(self.nCategory), self.explanation, self.examples, self.embedding.shape)
 
 
-class EntryKey(object):
+class EntryKey(JsonDecodable):
     def __init__(self, word: Optional[str] = None, category: Optional[str] = None):
         """
         constructs an EntryKey object
@@ -90,6 +91,11 @@ class EntryKey(object):
 
     def __repr__(self):
         return str(self)
+
+    @classmethod
+    def fromJSON(cls, jsonData):
+        cat = jsonData.get("category")
+        return cls(jsonData.get("word"), None if cat == "null" else cat)
 
 
 class Entry(object):

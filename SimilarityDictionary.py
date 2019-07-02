@@ -4,9 +4,10 @@ import numpy as np
 from typing import List, Callable, Optional, Tuple, Sequence
 from collections import UserDict
 from EmbeddingDictionary import EntryKey, EntryValue, EmbeddingDictionary
+from Jsonifiable import JsonEncodable
 
 
-class WordSimilarity(object):
+class WordSimilarity(JsonEncodable):
     def __init__(self, word: str, similarityScore: float):
         if not isinstance(word, str) or not isinstance(similarityScore, float):
             raise TypeError('WordSimilarity expects (str, float), but got (%s, %s)' % \
@@ -31,8 +32,11 @@ class WordSimilarity(object):
     def __lt__(self, other):
         return self.similarity < other.similarity
 
+    def jsonDefault(self):
+        return dict(word=self.word, similarityScore=self.similarity)
 
-class WordSimilarityList(np.ndarray):
+
+class WordSimilarityList(np.ndarray, JsonEncodable):
 
     def __new__(cls, inputArray):
         obj = np.asarray(inputArray).view(cls)
@@ -67,20 +71,12 @@ class WordSimilarityList(np.ndarray):
 
     def __str__(self):
         return self.stringify("%d. %s\n")
-        # ret = ""
-        # for i, ws in enumerate(self):
-        #     if not isinstance(ws, WordSimilarity):
-        #         raise TypeError('WordSimilarityList expects element type WordSimilarity, '
-        #                         'but got %s' % type(ws))
-        #     ret += "%d. %s\n" % (i+1, ws)
-        # ret = ret[:-1]
-        # return ret
 
-    # def __repr__(self):
-    #     return 'WordSimilarityList(%s)' % super().__repr__()
+    def jsonDefault(self):
+        return self.tolist()
 
 
-class CategorySimilarityDict(UserDict):
+class CategorySimilarityDict(UserDict, JsonEncodable):
     def stringify(self, strFormat):
         ret = ""
         for cat, simList in self.items():
@@ -93,6 +89,9 @@ class CategorySimilarityDict(UserDict):
 
     def __repr__(self):
         return "CategorySimilarityDict(%s)" % super().__repr__()
+
+    def jsonDefault(self):
+        return self.data
 
 
 class SimilarityDictionary(object):
