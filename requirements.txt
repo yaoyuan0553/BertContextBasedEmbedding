@@ -2,3 +2,5 @@ pytorch_pretrained_bert==0.6.2
 torch==1.1.0
 flair==0.4.2
 typing==3.7.4
+docopt
+flask
