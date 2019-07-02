@@ -1,5 +1,5 @@
 let xhr = new XMLHttpRequest();
-let url = "http://127.0.0.1:5001/similarity_ranker";
+let url = "http://0.0.0.0:5001/similarity_ranker";
 
 $(document).ready(function() {
     let wordInputField = $('.wordForm .chosen-value')[0];
@@ -23,7 +23,6 @@ $(document).ready(function() {
         inputField.addEventListener('input', function () {
             dropdown.classList.add('open');
             var inputValue = inputField.value;
-            var valueSubstring = undefined;
             if (inputValue.length > 0) {
                 for (var j = 0; j < valueArray.length; j++) {
                     if (!(inputValue.substring(0, inputValue.length)
@@ -228,18 +227,25 @@ $(document).ready(function() {
         yAxis : [
             {
                 type : 'category',
-                data : []
+                data : [],
+                axisLine : {show : false},
+                axisTick : {show : false},
+                axisLabel : {
+                    fontFamily: 'Microsoft YaHei',
+                    fontWeight: 'bold',
+                    fontSize: 14
+                }
             }
         ],
         series : [
             {
                 name:'相似度',
                 type:'bar',
-                itemStyle : { normal: {label : {show: true, position: 'right', formatter: "{c}\%"}}},
+                itemStyle : { normal: {label : {show: true, position: 'right', formatter: function(params) {console.log(params);}}}},
                 data:[]
             }
         ],
-        animationDurationUpdate: 1000
+        animationDurationUpdate: 800
     };
 
     function updateBarGraph(dict)
@@ -257,15 +263,37 @@ $(document).ready(function() {
             ]
         };
 
-        myChart.setOption(newOption)
+        myChart.setOption(newOption);
+
+        sims = myChart.getOption().series[0].data;
+
+        console.log(sims.length);
+        let autoHeight = sims.length * 40 + 150;
+        myChart.getDom().style.height = autoHeight + "px";
+        myChart.getDom().childNodes[0].style.height = autoHeight + "px";
+        myChart.getDom().childNodes[0].childNodes[0].setAttribute("height", autoHeight);
+        myChart.getDom().childNodes[0].childNodes[0].style.height = autoHeight + "px";
+        myChart.resize();
     }
 
     // updateBarGraph(sampleData);
 
     myChart.setOption(option);
 
+    var loading = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.target.classList.add('loading');
+        e.target.setAttribute('disabled','disabled');
+        setTimeout(function(){
+            e.target.classList.remove('loading');
+            e.target.removeAttribute('disabled');
+        },1500);
+    };
+
     var computeButton = $('button.compute-ranking')[0];
-    computeButton.onclick = function () {
+    computeButton.onclick = function (e) {
+        loading(e);
         dataSender(makeData());
     };
 
