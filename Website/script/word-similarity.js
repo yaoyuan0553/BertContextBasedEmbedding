@@ -1,3 +1,5 @@
+// import {themes} from 'echart-themes';
+
 let xhr = new XMLHttpRequest();
 let url = "http://0.0.0.0:5001/similarity_ranker";
 
@@ -7,6 +9,8 @@ $(document).ready(function() {
     let catInputField = $('.categoryForm .chosen-value')[0];
     let catDropdown = $('.categoryForm .value-list')[0];
     let rankCount = $('.rankCountForm input.rankCount')[0];
+    let computeButton = $('button.compute-ranking')[0];
+
 
     function updateDropdownEvents(inputField, dropdown) {
         var dropdownItems = dropdown.querySelectorAll('li');
@@ -115,32 +119,29 @@ $(document).ready(function() {
     {
         if (xhr.readyState === 4 && xhr.status === 200) {
             var data = JSON.parse(xhr.responseText);
-            console.log(data);
 
             var newGraphData = {
                 "words": [],
                 "sims": []
             };
             if (data.hasOwnProperty('info')) {
-                // console.log(data.info);
                 if (data.info.hasOwnProperty('categories')) {
                     // updateCategoryList(data.info.categories);
                     updateDropdownForm(catInputField, catDropdown, data.info.categories);
                     updateDropdownForm(wordInputField, wordDropdown, data.info.words);
                 }
             }
-            // console.log(data.sim_ranks);
             for (let cat in data.sim_ranks) {
                 if (data.sim_ranks.hasOwnProperty(cat)) {
-                    // console.log(cat);
                     for (var i = data.sim_ranks[cat].length - 1; i >= 0; i--) {
-                        // console.log(data[cat][i]);
                         newGraphData.words.push(data.sim_ranks[cat][i]['word']);
                         newGraphData.sims.push(data.sim_ranks[cat][i]['similarityScore']);
                     }
                 }
             }
-            // console.log(newGraphData);
+            // reset button from loading back to normal
+            computeButton.classList.remove('loading');
+            computeButton.removeAttribute('disabled');
             updateBarGraph(newGraphData)
         }
     }
@@ -159,8 +160,6 @@ $(document).ready(function() {
         var cat = catInputField.value;
         var word = wordInputField.value;
         var n = rankCount.value;
-        console.log(n !== "");
-        console.log(n);
         if (n !== "" && isNaN(n)) {
             alert("显示数量必须为数字!");
             return null;
@@ -187,16 +186,24 @@ $(document).ready(function() {
     function dataSender(data)
     {
         // if data is null do nothing
-        if (data === null)
+        if (data === null) {
+            computeButton.classList.remove('loading');
+            computeButton.removeAttribute('disabled');
             return;
+        }
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/json");
 
-        console.log(data);
         xhr.send(data);
     }
 
-    let myChart = echarts.init(document.getElementById('main'));
+    function simDataFormatter(params)
+    {
+        return params.value.toFixed(2).toString() + "\%";
+    }
+
+    let myChart = echarts.init(document.getElementById('main'), 'chalk');
+
     option = {
         title : {
             text: '词汇相似度排名',
@@ -206,6 +213,11 @@ $(document).ready(function() {
             axisPointer : {            // 坐标轴指示器，坐标轴触发有效
                 type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
             },
+            formatter: function(params) {
+                let ret = params[0].name + "<br/>" + params[0].seriesName + ": " +
+                    params[0].value.toString() + '\%';
+                return ret;
+            }
         },
         toolbox: {
             show : true,
@@ -231,7 +243,7 @@ $(document).ready(function() {
                 axisLine : {show : false},
                 axisTick : {show : false},
                 axisLabel : {
-                    fontFamily: 'Microsoft YaHei',
+                    fontFamily: 'KaiTi_GB2312',
                     fontWeight: 'bold',
                     fontSize: 14
                 }
@@ -241,8 +253,15 @@ $(document).ready(function() {
             {
                 name:'相似度',
                 type:'bar',
-                itemStyle : { normal: {label : {show: true, position: 'right', formatter: function(params) {console.log(params);}}}},
-                data:[]
+                data:[],
+                label: {
+                    show: true,
+                    position: 'right',
+                    formatter: simDataFormatter,
+                    fontFamily: 'Arial',
+                    fontWeight: 'bold',
+                    fontSize: 14
+                }
             }
         ],
         animationDurationUpdate: 800
@@ -267,7 +286,6 @@ $(document).ready(function() {
 
         sims = myChart.getOption().series[0].data;
 
-        console.log(sims.length);
         let autoHeight = sims.length * 40 + 150;
         myChart.getDom().style.height = autoHeight + "px";
         myChart.getDom().childNodes[0].style.height = autoHeight + "px";
@@ -285,17 +303,21 @@ $(document).ready(function() {
         e.stopPropagation();
         e.target.classList.add('loading');
         e.target.setAttribute('disabled','disabled');
-        setTimeout(function(){
-            e.target.classList.remove('loading');
-            e.target.removeAttribute('disabled');
-        },1500);
     };
 
-    var computeButton = $('button.compute-ranking')[0];
-    computeButton.onclick = function (e) {
+    // register button actions
+    computeButton.onclick = function(e) {
         loading(e);
         dataSender(makeData());
     };
+    let enterKeySubmitAction = function(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            computeButton.click();
+        }
+    };
+
+    $('body').keypress(enterKeySubmitAction);
 
     dataSender(makeData(true));
 });

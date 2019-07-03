@@ -5,6 +5,7 @@
     <title>word-similarity</title>
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
     <script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts.js"></script>
+    <script src="script/chalk-theme.js"></script>
     <script src="script/word-similarity.js"></script>
     <link rel="stylesheet" type="text/css" href="stylesheets/styles.css"/>
 </head>
@@ -18,24 +19,24 @@
 <body>
 <h1>副词语义相似度计算器</h1>
 <div>
-    <div style="text-align:center;margin-top: 5ch; position: relative;">
+    <div style="text-align:center;margin-top: 0ch; position: relative;">
         <form class="rankCountForm">
-            <div>显示数量</div>
+            <div class="inputTitle">显示数量</div>
             <input class="rankCount" type="text" />
         </form>
         <form class="wordForm">
-            <div>词汇</div>
+            <div class="inputTitle">词汇</div>
             <input class="chosen-value" type="text" value="" placeholder="选择词汇">
             <ul class="value-list"></ul>
         </form>
         <form class="categoryForm">
-            <div>类别</div>
+            <div class="inputTitle">类别</div>
             <input class="chosen-value" type="text" value="" placeholder="选择类别">
             <ul class="value-list"></ul>
         </form>
         <button class="compute-ranking" data-label="计算" >计算</button>
     </div>
-    <div class="result">
+    <div class="result" style="padding-top: 5ch">
         <div id="main" style="width: 800px;height:400px;margin-left: auto; margin-right: auto;margin-top: 7ch"></div>
     </div>
 </div>

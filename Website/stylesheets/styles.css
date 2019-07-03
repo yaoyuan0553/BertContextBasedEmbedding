@@ -1,13 +1,14 @@
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+
 body {
     padding: 30px;
-    background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    /* box-sizing: border-box; */
+    background-color: rgba(41,52,65,1);
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -23,11 +24,8 @@ body {
     -webkit-box-pack: start;
     -ms-flex-pack: start;
     justify-content: flex-start;
-    /* font-family: 'Ek Mukta'; */
-    /* text-transform: uppercase; */
     font-weight: 600;
     letter-spacing: 2px;
-    /* background: #1D1F20; */
 }
 
 h1 {
@@ -40,7 +38,7 @@ h1 {
     font-family: 'Open Sans';
     text-transform: capitalize;
     font-weight: 800;
-    color: gray;
+    color: floralwhite;
 }
 h1 span {
     color: #FF908B;
@@ -48,7 +46,7 @@ h1 span {
 
 .categoryForm {
     top: 5%;
-    left: 60%;
+    left: 35%;
     width: 15rem;
     margin-top: 8vh;
     position: absolute;
@@ -57,7 +55,7 @@ h1 span {
 
 .wordForm {
     top: 5%;
-    left: 29%;
+    left: 2%;
     width: 15rem;
     margin-top: 8vh;
     position: absolute;
@@ -66,7 +64,7 @@ h1 span {
 
 .rankCountForm {
     top: 5%;
-    left: 2%;
+    left: 60%;
     width: 15rem;
     margin-top: 8vh;
     position: absolute;
@@ -173,10 +171,13 @@ h1 span {
     opacity: 0;
 }
 
-button {
-    position:relative;
+button.compute-ranking {
+    left: 90%;
+    width: 10rem;
+    height: inherit;
+    margin-top: 10vh;
+    position: absolute;
     border:0;
-    margin:0;
     padding:0;
     cursor:pointer;
     font-size:1rem;
@@ -188,9 +189,9 @@ button {
     -webkit-touch-callout: none;
 }
 
-button,
-button:after,
-button:before {
+button.compute-ranking,
+button.compute-ranking:after,
+button.compute-ranking:before {
     padding:.6875rem 2rem;
     -webkit-transition:-webkit-transform 0.75s,background-color .125s;
     -moz-transition:-moz-transform 0.75s,background-color .125s;
@@ -202,8 +203,8 @@ button:before {
     transform-style:preserve-3d;
 }
 
-button:after,
-button:before {
+button.compute-ranking:after,
+button.compute-ranking:before {
     position:absolute;
     top:0;
     bottom:0;
@@ -217,14 +218,14 @@ button:before {
 
 }
 
-button:before {
+button.compute-ranking:before {
     z-index:2;
     color:#fff;
     background-color:#3e87ec;
     content:attr(data-label);
 }
 
-button:after {
+button.compute-ranking:after {
     z-index:1;
     background-color:#999;
     background-repeat:no-repeat;
@@ -237,13 +238,17 @@ button:after {
     content:'';
 }
 
-button:active:before {
+button.compute-ranking:active:before {
     background-color:#3571c8;
 }
 
-button.loading {
+button.compute-ranking.loading {
     -webkit-transform:rotateX(180deg);
     -moz-transform:rotateX(180deg);
     -ms-transform:rotateX(180deg);
     transform:rotateX(180deg);
+}
+
+.inputTitle {
+    color: white;
 }
