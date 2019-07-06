@@ -3,3 +3,5 @@
 __*/
 
 *.tmp
+
+node_modules/

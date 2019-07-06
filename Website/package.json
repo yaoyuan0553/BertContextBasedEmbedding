@@ -1,0 +1,13 @@
+{
+  "name": "BertContextBasedEmbedding",
+  "version": "0.0.1",
+  "dependencies": {
+    "typescript": "latest",
+    "class-transformer": "^0.2.3",
+    "reflect-metadata": "^0.1.13",
+    "echarts": "^4.1.9",
+    "@types/echarts": "^4.1.9",
+    "jquery": "^3.3.30",
+    "@types/jquery": "^3.3.30"
+  }
+}
