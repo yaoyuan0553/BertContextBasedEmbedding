@@ -1,7 +1,7 @@
 // import {themes} from 'echart-themes';
 
 let xhr = new XMLHttpRequest();
-let url = "http://0.0.0.0:5001/similarity_ranker";
+let url = "http://127.0.0.1:5001/similarity_ranker";
 
 $(document).ready(function() {
     let wordInputField = $('.wordForm .chosen-value')[0];
