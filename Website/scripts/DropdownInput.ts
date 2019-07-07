@@ -14,6 +14,8 @@ class DropdownInput {
         this.inputField = inputFieldElement;
         this.dropdown = dropdownElement;
 
+        this.updateDropdownEvents();
+        this.addDropdownEvent();
     }
 
     private updateDropdownEvents()
@@ -78,5 +80,23 @@ class DropdownInput {
             if (!isDropdown && !isInput)
                 this.dropdown.classList.remove('open');
         });
+    }
+
+    update(newFields: string[], auto: boolean = false)
+    {
+        this.dropdown.innerHTML = "";
+        if (auto) {
+            let autoLi = document.createElement('li');
+            autoLi.innerText = '[自动]';
+            this.dropdown.appendChild(autoLi);
+        }
+        newFields.forEach((cat: string) =>
+        {
+            let li = document.createElement('li');
+            li.innerText = cat;
+            this.dropdown.appendChild(li);
+        });
+
+        this.updateDropdownEvents();
     }
 }

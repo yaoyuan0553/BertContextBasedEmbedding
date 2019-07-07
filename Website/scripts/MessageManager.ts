@@ -1,7 +1,7 @@
 import {classToPlain} from "class-transformer";
 import {WordSimilarityRequest, WordCategoryInfoRequest} from "./MessageDataType";
 
-class MessageManager {
+export class MessageManager {
     xhr: XMLHttpRequest;
     url: string;
 

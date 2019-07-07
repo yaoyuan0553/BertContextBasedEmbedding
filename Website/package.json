@@ -1,7 +1,8 @@
 {
-  "name": "BertContextBasedEmbedding",
+  "name": "similarity-ranker",
   "version": "0.0.1",
   "dependencies": {
+    "requirejs": "2.3.6",
     "typescript": "latest",
     "class-transformer": "^0.2.3",
     "reflect-metadata": "^0.1.13",
