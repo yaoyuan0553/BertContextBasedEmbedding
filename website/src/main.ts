@@ -3,6 +3,17 @@ import App from './App.vue';
 
 Vue.config.productionTip = false;
 
-new Vue({
+const vm: Vue = new Vue({
   render: (h) => h(App),
-}).$mount('#app');
+});
+
+vm.$mount('#app');
+
+// const app = vm.$children[0] as App;
+// const bodyTag: HTMLBodyElement = document.getElementsByTagName('body')[0];
+//
+// bodyTag.onkeyup = (e: KeyboardEvent) => {
+//   if (e.key === 'Enter') {
+//       // app.$refs.computeButton.$refs.computeButton.click();
+//   }
+// };

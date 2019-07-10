@@ -1,6 +1,6 @@
 <template>
     <button ref="computeButton" class="compute-ranking"
-            data-label="计算" @click="compute">计算</button>
+            data-label="计算" @click="compute" @keyup.enter="compute">计算</button>
 </template>
 
 <script lang="ts">
@@ -8,30 +8,38 @@ import { Component, Vue } from 'vue-property-decorator';
 
 @Component
 export default class ComputeButton extends Vue {
-    $refs!: {
+    public $refs!: {
         computeButton: HTMLButtonElement;
     };
 
-    private loading(e: Event)
-    {
-        e.preventDefault();
-        e.stopPropagation();
-        this.$refs.computeButton.classList.add('loading');
-        this.$refs.computeButton.setAttribute('disabled', 'disabled');
-    }
-
-    compute(e: Event)
-    {
+    public compute(e: Event) {
+        console.log('blah');
         this.loading(e);
         setTimeout(() => this.reset(), 2000);
     }
 
-    reset(callback?: () => void)
-    {
+    public reset(callback?: () => void) {
         this.$refs.computeButton.classList.remove('loading');
         this.$refs.computeButton.removeAttribute('disabled');
-        if (callback !== undefined)
+        if (callback !== undefined) {
             callback();
+        }
+    }
+
+    public registerGlobalEnterKey()
+    {
+        document.onkeyup = (e: KeyboardEvent) => {
+            if (e.key === 'Enter') {
+                this.$refs.computeButton.click();
+            }
+        };
+    }
+
+    private loading(e: Event) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.$refs.computeButton.classList.add('loading');
+        this.$refs.computeButton.setAttribute('disabled', 'disabled');
     }
 }
 </script>
@@ -115,7 +123,4 @@ button.compute-ranking.loading {
     transform:rotateX(180deg);
 }
 
-.inputTitle {
-    color: white;
-}
 </style>
