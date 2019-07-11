@@ -1,6 +1,6 @@
 <template>
     <button ref="computeButton" class="compute-ranking"
-            data-label="计算" @click="compute" @keyup.enter="compute">计算</button>
+            data-label="计算" @click="compute">计算</button>
 </template>
 
 <script lang="ts">
@@ -12,9 +12,13 @@ export default class ComputeButton extends Vue {
         computeButton: HTMLButtonElement;
     };
 
+    public onCompute: (() => void) | undefined;
+
     public compute(e: Event) {
         console.log('blah');
         this.loading(e);
+        if (this.onCompute !== undefined)
+            this.onCompute();
         setTimeout(() => this.reset(), 2000);
     }
 
@@ -30,9 +34,15 @@ export default class ComputeButton extends Vue {
     {
         document.onkeyup = (e: KeyboardEvent) => {
             if (e.key === 'Enter') {
-                this.$refs.computeButton.click();
+                e.preventDefault();
+                this.click();
             }
         };
+    }
+
+    public click()
+    {
+        this.$refs.computeButton.click();
     }
 
     private loading(e: Event) {
@@ -45,23 +55,6 @@ export default class ComputeButton extends Vue {
 </script>
 
 <style scoped>
-button.compute-ranking {
-    left: 50%;
-    width: 10rem;
-    height: inherit;
-    margin-top: 10vh;
-    position: absolute;
-    border:0;
-    padding:0;
-    cursor:pointer;
-    font-size:1rem;
-    font-weight:bold;
-    color:rgba(0,0,0,0);
-    background:transparent;
-    border-radius:.25rem;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-    -webkit-touch-callout: none;
-}
 
 button.compute-ranking,
 button.compute-ranking:after,

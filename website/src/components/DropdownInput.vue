@@ -1,19 +1,115 @@
 <template>
     <form class="dropdown-input">
         <div class="inputTitle">{{ title }}</div>
-        <input class="chosen-value" type="text" value="" :placeholder="placeholder" />
-        <ul class="value-list"></ul>
+        <input ref="inputField" class="chosen-value" type="text" value="" :placeholder="placeholder" @keypress.enter.prevent/>
+        <ul ref="dropdown" class="value-list"></ul>
     </form>
 </template>
 
 <script lang="ts">
 
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import InputElement from './InputElement'
 
 @Component
 export default class DropdownInput extends Vue {
+    $refs!: {
+        inputField: HTMLInputElement,
+        dropdown: HTMLUListElement
+    };
+
     @Prop() private title!: string;
     @Prop() private placeholder!: string;
+
+    value() {
+        return this.$refs.inputField.value;
+    }
+
+    mounted()
+    {
+        this.updateDropdownEvents();
+        this.addDropdownEvent();
+    }
+
+    private addDropdownEvent()
+    {
+        document.addEventListener('click', (evt) => {
+            let isDropdown = this.$refs.dropdown.contains(<Node>evt.target);
+            let isInput = this.$refs.inputField.contains(<Node>evt.target);
+            if (!isDropdown && !isInput)
+                this.$refs.dropdown.classList.remove('open');
+        });
+    }
+
+    private updateDropdownEvents() {
+        let dropdownItems = this.$refs.dropdown.querySelectorAll("li");
+        let valueArray: string[] = [];
+
+        dropdownItems.forEach((item) => {
+            if (item.textContent)
+              valueArray.push(item.textContent);
+        });
+
+        this.$refs.inputField.addEventListener('input', () => {
+            this.$refs.dropdown.classList.add('open');
+            let inputValue = this.$refs.inputField.value;
+            if (inputValue.length > 0) {
+                for (let j = 0; j < valueArray.length; j++) {
+                    if (!(inputValue.substring(0, inputValue.length)
+                        === valueArray[j].substring(0, inputValue.length))) {
+                        dropdownItems[j].classList.add('closed');
+                    } else {
+                        dropdownItems[j].classList.remove('closed');
+                    }
+                }
+            } else {
+                for (let i = 0; i < dropdownItems.length; i++) {
+                    dropdownItems[i].classList.remove('closed');
+                }
+            }
+        });
+        dropdownItems.forEach((item) => {
+            item.addEventListener('click', () => {
+                this.$refs.inputField.value = item.textContent as string;
+                dropdownItems.forEach((dropdown) => {
+                    dropdown.classList.add('closed');
+                });
+            });
+        });
+
+        let origPlaceHolder = this.$refs.inputField.placeholder;
+
+        this.$refs.inputField.addEventListener('focus', () => {
+            this.$refs.inputField.placeholder = '输入以筛选';
+            this.$refs.dropdown.classList.add('open');
+            dropdownItems.forEach(function (dropdown) {
+                dropdown.classList.remove('closed');
+            });
+        });
+
+        this.$refs.inputField.addEventListener('blur', () => {
+            this.$refs.inputField.placeholder = origPlaceHolder;
+            this.$refs.dropdown.classList.remove('open');
+        });
+    }
+
+    public update(newFields: string[], auto: boolean = false)
+    {
+        this.$refs.dropdown.innerHTML = "";
+        if (auto) {
+            let autoLi = document.createElement('li');
+            autoLi.innerText = '[自动]';
+            this.$refs.dropdown.appendChild(autoLi);
+        }
+        newFields.forEach((cat: string) =>
+        {
+            let li = document.createElement('li');
+            li.innerText = cat;
+            this.$refs.dropdown.appendChild(li);
+        });
+
+        this.updateDropdownEvents();
+    }
 }
 
 </script>
@@ -21,7 +117,6 @@ export default class DropdownInput extends Vue {
 <style scoped>
 
 form.dropdown-input {
-    display: inline;
 }
 
 .chosen-value,
@@ -77,6 +172,11 @@ form.dropdown-input {
     max-height: 400px;
     overflow: auto;
 }
+
+</style>
+
+<style>
+
 .value-list li {
     position: relative;
     height: 2rem;

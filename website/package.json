@@ -11,12 +11,18 @@
     "core-js": "^2.6.5",
     "vue": "^2.6.10",
     "vue-class-component": "^7.0.2",
-    "vue-property-decorator": "^8.1.0"
+    "vue-property-decorator": "^8.1.0",
+    "echarts": "^4.2.1",
+    "jquery": "^3.4.1",
+    "class-transformer": "^0.2.3",
+    "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.9.0",
     "@vue/cli-plugin-typescript": "^3.9.0",
     "@vue/cli-service": "^3.9.0",
+    "@types/echarts": "^4.1.9",
+    "@types/jquery": "^3.3.30",
     "typescript": "^3.4.3",
     "vue-template-compiler": "^2.6.10"
   }
