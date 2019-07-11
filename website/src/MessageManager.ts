@@ -18,9 +18,7 @@ export default class MessageManager {
     public send(data: Mdt.WordSimilarityRequest | Mdt.WordCategoryInfoRequest)
     {
         const test = classToPlain(data);
-        console.log('converted:', test);
         const msg: string = JSON.stringify(classToPlain(data));
-        console.log(msg);
         this.xhr.open('POST', this.url, true);
         this.xhr.setRequestHeader('Content-Type', 'application/json');
         this.xhr.send(msg);

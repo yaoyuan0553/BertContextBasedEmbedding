@@ -15,11 +15,9 @@ export default class ComputeButton extends Vue {
     public onCompute: (() => void) | undefined;
 
     public compute(e: Event) {
-        console.log('blah');
         this.loading(e);
         if (this.onCompute !== undefined)
             this.onCompute();
-        setTimeout(() => this.reset(), 2000);
     }
 
     public reset(callback?: () => void) {

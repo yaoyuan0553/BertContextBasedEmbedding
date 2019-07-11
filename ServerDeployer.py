@@ -35,7 +35,8 @@ def main():
         requestedJson = request.get_json()
         if not requestedJson:
             return "Invalid Requested Data"
-        requestInfo = requestedJson['request_info']
+
+        requestInfo = requestedJson.get('request_info', False)
     except Exception:
         return "Invalid Requested Data"
     try:

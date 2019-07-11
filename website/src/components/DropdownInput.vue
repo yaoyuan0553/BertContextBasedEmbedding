@@ -127,7 +127,7 @@ form.dropdown-input {
 .chosen-value {
     /* font-family: "NSimSun"; */
     font-weight: 600;
-    letter-spacing: 4px;
+    letter-spacing: 2px;
     height: 2rem;
     font-size: 1.1rem;
     padding: 1rem;
@@ -166,7 +166,7 @@ form.dropdown-input {
     max-height: 0;
     -webkit-transition: .3s ease-in-out;
     transition: .3s ease-in-out;
-    opacity: 0.9;
+    opacity: 0.93;
 }
 .value-list.open {
     max-height: 400px;

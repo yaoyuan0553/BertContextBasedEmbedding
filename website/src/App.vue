@@ -8,6 +8,8 @@
       <ComputeButton ref="computeButton" class="compute-button"/>
     </div>
     <SimilarityRankingGraph ref="simRankGraph"/>
+    <button @click="$refs.simRankGraph.chart.nextCategory()">Next</button>
+    <button @click="$refs.simRankGraph.chart.prevCategory()">Prev</button>
   </div>
 </template>
 
@@ -37,38 +39,33 @@ export default class App extends Vue {
         computeButton: ComputeButton,
         wordDi: DropdownInput,
         categoryDi: DropdownInput,
-        countIb: InputBox
+        countIb: InputBox,
+        simRankGraph: SimilarityRankingGraph
     };
 
     messageManager: MessageManager | undefined;
 
     private updateOnMessage(xhr: XMLHttpRequest, ev?: Event) {
         if (xhr.readyState === 4 && xhr.status === 200) {
-            console.log('response:', xhr.responseText);
             let data = JSON.parse(xhr.responseText);
-            console.log(data);
             if (data.hasOwnProperty('info')) {
                 const response = plainToClass(Mdt.WordCategoryInfoResponse, data);
-                console.log(response);
                 this.$refs.wordDi.update(response.info.words);
                 this.$refs.categoryDi.update(response.info.categories, true);
             } else if (data.hasOwnProperty('sim_ranks')) {
                 const response = plainToClass(Mdt.SimilarityRankResponse, data);
-                console.log(response);
-                let newGraphData: Record<string, any[]> = {
-                    words: [],
-                    sims: []
-                };
+                let words: string[] = [];
+                let sims: number[] = [];
                 for (let cat in response.sim_ranks) {
                     const catSimRanks = response.sim_ranks[cat];
                     for (let i = catSimRanks.length-1; i >= 0; i--) {
-                        newGraphData.words.push(catSimRanks[i].word);
-                        newGraphData.sims.push(catSimRanks[i].similarityScore);
+                        words.push(catSimRanks[i].word);
+                        sims.push(catSimRanks[i].similarityScore);
                     }
                 }
-
-                console.log(newGraphData);
+                this.$refs.simRankGraph.chart.update(response.sim_ranks);
             }
+            this.$refs.computeButton.reset();
         }
     }
 
@@ -78,14 +75,12 @@ export default class App extends Vue {
         const cat = this.$refs.categoryDi.value();
         const n = this.$refs.countIb.value();
 
-        console.log(word, cat, n);
-
         if (word === "")
             return null;
 
         let ret = new Mdt.WordSimilarityRequest(word, cat, n);
         if (cat === '[自动]')
-            ret.category = null;
+            ret.category = 'null';
 
         return ret;
     }
@@ -103,13 +98,13 @@ export default class App extends Vue {
         this.messageManager.send(infoRequest);
 
         this.$refs.computeButton.onCompute = () => {
-            console.log('onCompute called');
             let reqData = this.collectRequestData();
             console.log(reqData);
             if (reqData !== null)
                 this.messageManager!.send(reqData);
+            else
+                this.$refs.computeButton.reset();
         };
-        // this.messageManager.test();
     }
 
 }

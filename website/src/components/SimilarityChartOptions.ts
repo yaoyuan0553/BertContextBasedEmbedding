@@ -1,6 +1,12 @@
 import echarts from 'echarts';
 
 export let similarityChartOption: echarts.EChartOption<echarts.EChartOption.SeriesBar> = {
+    dataset: {
+        dimensions: ['word', 'similarityScore'],
+        source: [
+
+        ],
+    },
     title : {
         text: '词汇相似度排名',
     },
@@ -9,10 +15,10 @@ export let similarityChartOption: echarts.EChartOption<echarts.EChartOption.Seri
         axisPointer : {            // 坐标轴指示器，坐标轴触发有效
             type : 'shadow',        // 默认为直线，可选为：'line' | 'shadow'
         },
-        formatter: (params) => {
-            // @ts-ignore
-            return params[0].name + '<br/>' + params[0].seriesName + ': ' + params[0].value.toString() + '\%';
-        },
+        // formatter: (params) => {
+        //     // @ts-ignore
+        //     return params[0].name + '<br/>' + params[0].seriesName + ': ' + params[0].value.toString() + '\%';
+        // },
     },
     toolbox: {
         show : true,
@@ -34,7 +40,7 @@ export let similarityChartOption: echarts.EChartOption<echarts.EChartOption.Seri
     yAxis : [
         {
             type : 'category',
-            data : [],
+            // data : [],
             axisLine : {show : false},
             axisTick : {show : false},
             axisLabel : {
@@ -48,13 +54,18 @@ export let similarityChartOption: echarts.EChartOption<echarts.EChartOption.Seri
         {
             name: '相似度',
             type: 'bar',
-            data: [],
+
+            datasetIndex: 0,
+            // data: [],
+            encode: {
+                y: 'word',
+            },
             label: {
                 show: true,
                 position: 'right',
-                formatter: (params: { value: { toFixed: (arg0: number) => { toString: () => string; }; }; }) => {
-                    return params.value.toFixed(2).toString() + '\%';
-                },
+                // formatter: (params: { value: { toFixed: (arg0: number) => { toString: () => string; }; }; }) => {
+                //     return params.value.toFixed(2).toString() + '\%';
+                // },
                 fontFamily: 'Arial',
                 fontWeight: 'bold',
                 fontSize: 14,
