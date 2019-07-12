@@ -66,6 +66,7 @@ export default class App extends Vue {
                 this.$refs.simRankGraph.chart.update(response.sim_ranks);
             }
             this.$refs.computeButton.reset();
+            this.$refs.simRankGraph.chart.chart.hideLoading();
         }
     }
 
@@ -100,8 +101,10 @@ export default class App extends Vue {
         this.$refs.computeButton.onCompute = () => {
             let reqData = this.collectRequestData();
             console.log(reqData);
-            if (reqData !== null)
+            if (reqData !== null) {
+                this.$refs.simRankGraph.chart.chart.showLoading();
                 this.messageManager!.send(reqData);
+            }
             else
                 this.$refs.computeButton.reset();
         };

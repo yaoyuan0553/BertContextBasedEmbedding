@@ -1,12 +1,12 @@
 import echarts from 'echarts';
 
 export let similarityChartOption: echarts.EChartOption<echarts.EChartOption.SeriesBar> = {
-    dataset: {
-        dimensions: ['word', 'similarityScore'],
-        source: [
-
-        ],
-    },
+    // dataset: [{
+    //     dimensions: ['word', 'similarityScore'],
+    //     source: [
+    //
+    //     ],
+    // }],
     title : {
         text: '词汇相似度排名',
     },
@@ -29,6 +29,18 @@ export let similarityChartOption: echarts.EChartOption<echarts.EChartOption.Seri
             saveAsImage : {show: true},
         },
     },
+    legend: [{
+        show: true,
+        data: [{
+            name: '相似度',
+            // 强制设置图形为圆。
+            icon: 'circle',
+            textStyle: {
+                color: 'white',
+                fontSize: 16,
+            },
+        }],
+    }],
     xAxis : [
         {
             type : 'value',
@@ -57,9 +69,6 @@ export let similarityChartOption: echarts.EChartOption<echarts.EChartOption.Seri
 
             datasetIndex: 0,
             // data: [],
-            encode: {
-                y: 'word',
-            },
             label: {
                 show: true,
                 position: 'right',
