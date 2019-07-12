@@ -100,7 +100,9 @@ export default class App extends Vue {
     public mounted() {
         // @ts-ignore
         this.$refs.computeButton.registerGlobalEnterKey();
-        this.messageManager = new MessageManager(this.updateOnMessage);
+        const ip = "http://" + window.location.hostname + ":5001/similarity_ranker";
+        this.messageManager = new MessageManager(this.updateOnMessage, ip);
+
 
         const infoRequest = new Mdt.WordCategoryInfoRequest();
         console.log(infoRequest);

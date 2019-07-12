@@ -76,4 +76,4 @@ if __name__ == "__main__":
     loader.load(args['--dict-src'])
     simDict = SimilarityDictionary(embedDict, cosineSimilarity)
 
-    app.run(port=5001)
+    app.run('0.0.0.0', port=5001)
