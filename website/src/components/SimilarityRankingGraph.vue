@@ -7,9 +7,9 @@
 <script lang="ts">
 
 import { Component, Vue } from 'vue-property-decorator';
-import SimilarityChart from './SimilarityChart';
+import SimilarityChart from '@/ts-components/SimilarityChart';
 import * as echarts from 'echarts';
-import { ChalkTheme} from "./EchartThemes";
+import { ChalkTheme } from '@/ts-components/EchartThemes';
 
 @Component
 export default class SimilarityRankingGraph extends Vue {

@@ -8,7 +8,6 @@
 <script lang="ts">
 
 import { Component, Prop, Vue } from "vue-property-decorator";
-import InputElement from "./InputElement"
 
 @Component
 export default class InputBox extends Vue {

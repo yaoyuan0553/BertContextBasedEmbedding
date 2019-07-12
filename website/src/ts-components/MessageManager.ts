@@ -1,5 +1,5 @@
 import {classToPlain, plainToClass} from 'class-transformer';
-import * as Mdt from '@/components/MessageDataTypes';
+import * as Mdt from '@/ts-components/MessageDataTypes';
 
 export default class MessageManager {
 
