@@ -50,7 +50,9 @@ export default class App extends Vue {
             let data = JSON.parse(xhr.responseText);
             if (data.hasOwnProperty('info')) {
                 const response = plainToClass(Mdt.WordCategoryInfoResponse, data);
+                // @ts-ignore
                 this.$refs.wordDi.update(response.info.words);
+                // @ts-ignore
                 this.$refs.categoryDi.update(response.info.categories, true);
             } else if (data.hasOwnProperty('sim_ranks')) {
                 const response = plainToClass(Mdt.SimilarityRankResponse, data);
@@ -63,17 +65,23 @@ export default class App extends Vue {
                         sims.push(catSimRanks[i].similarityScore);
                     }
                 }
+                // @ts-ignore
                 this.$refs.simRankGraph.chart.update(response.sim_ranks);
             }
+            // @ts-ignore
             this.$refs.computeButton.reset();
+            // @ts-ignore
             this.$refs.simRankGraph.chart.chart.hideLoading();
         }
     }
 
     private collectRequestData() : Mdt.WordSimilarityRequest | null
     {
+        // @ts-ignore
         const word = this.$refs.wordDi.value();
+        // @ts-ignore
         const cat = this.$refs.categoryDi.value();
+        // @ts-ignore
         const n = this.$refs.countIb.value();
 
         if (word === "")
@@ -90,6 +98,7 @@ export default class App extends Vue {
     }
 
     public mounted() {
+        // @ts-ignore
         this.$refs.computeButton.registerGlobalEnterKey();
         this.messageManager = new MessageManager(this.updateOnMessage);
 
@@ -98,14 +107,17 @@ export default class App extends Vue {
 
         this.messageManager.send(infoRequest);
 
+        // @ts-ignore
         this.$refs.computeButton.onCompute = () => {
             let reqData = this.collectRequestData();
             console.log(reqData);
             if (reqData !== null) {
+                // @ts-ignore
                 this.$refs.simRankGraph.chart.chart.showLoading();
                 this.messageManager!.send(reqData);
             }
             else
+                // @ts-ignore
                 this.$refs.computeButton.reset();
         };
     }
