@@ -21,8 +21,8 @@ import DropdownInput from './components/DropdownInput.vue';
 import SimilarityRankingGraph from './components/SimilarityRankingGraph.vue'
 import InputBox from './components/InputBox.vue';
 
-import MessageManager from './MessageManager';
-import * as Mdt from './components/MessageDataTypes';
+import MessageManager from '@/ts-components/MessageManager';
+import * as Mdt from '@/ts-components/MessageDataTypes';
 import { plainToClass } from 'class-transformer';
 
 

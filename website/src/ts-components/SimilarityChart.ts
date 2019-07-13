@@ -1,7 +1,7 @@
 import * as echarts from 'echarts';
-import {similarityChartOption as option} from '@/components/SimilarityChartOptions';
-import {ChalkTheme} from '@/components/EchartThemes';
-import { WordSimilarityList } from '@/components/MessageDataTypes';
+import {similarityChartOption as option} from '@/ts-components/SimilarityChartOptions';
+import {ChalkTheme} from '@/ts-components/EchartThemes';
+import { WordSimilarityList } from '@/ts-components/MessageDataTypes';
 import YAxis = echarts.EChartOption.YAxis;
 
 interface CatWordSimilarity {
