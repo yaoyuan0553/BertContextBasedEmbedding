@@ -1,25 +1,25 @@
 <template>
-    <div class="file-uploader">
-      <div class="table">
-          <div class="table-cell">
-              <button class="close-button" @click="toggleMenu">&times;</button>
-              <div class="modal">
-                  <div id="profile" @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop" @click="onClick">
-                      <div class="dashes"></div>
-                      <label>Click to browse or drag an image here</label></div>
-                  <div class="editable"><i class="fa fa-pencil"></i></div>
-                  <button class="submit-button">Done Editing</button>
-              </div>
-          </div>
-      </div>
-      <input ref="mediaFile" @change="onMediaFileChange" type="file" id="mediaFile" />
-    </div>
+<!--    <div class="file-uploader">-->
+<!--      <div class="table">-->
+<!--          <div class="table-cell">-->
+<!--              <button class="close-button" @click="toggleMenu">&times;</button>-->
+<!--              <div class="modal">-->
+<!--                  <div id="profile" @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop" @click="onClick">-->
+<!--                      <div class="dashes"></div>-->
+<!--                      <label>Click to browse or drag an image here</label></div>-->
+<!--                  <div class="editable"><i class="fa fa-pencil"></i></div>-->
+<!--                  <button class="submit-button">Done Editing</button>-->
+<!--              </div>-->
+<!--          </div>-->
+<!--      </div>-->
+<!--      <input ref="mediaFile" @change="onMediaFileChange" type="file" id="mediaFile" />-->
+        <input id="input-id" type="file" class="file">
+<!--    </div>-->
 </template>
 
 <script lang='ts'>
 
 import {Component, Vue} from 'vue-property-decorator';
-import $ from 'jquery';
 
 @Component
 export default class FileUploader extends Vue {
@@ -76,10 +76,14 @@ export default class FileUploader extends Vue {
         }
     }
 
+    created()
+    {
+    }
+
     mounted()
     {
         console.log('file uploader', this);
-
+/*
         $('#profile').addClass('dragging').removeClass('dragging');
 
         window.addEventListener('dragover', (e?: Event) => {
@@ -92,7 +96,12 @@ export default class FileUploader extends Vue {
             if (e) {
                 e.preventDefault();
             }
-        }, false);
+        }, false);*/
+
+        $('#input-id').fileinput({
+            allowedFileExtensions: ["jpg", "gif", "png", "txt"],
+            theme: 'fas'
+        });
     }
 }
 
@@ -101,6 +110,8 @@ export default class FileUploader extends Vue {
 <style lang="scss" scoped>
 // ----- Personal preference -----
 *, *:before, *:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
 
@@ -109,8 +120,8 @@ export default class FileUploader extends Vue {
     height: 100%;
     left: 0;
     top: 0;
-    position: absolute;
-    z-index: 500;
+    position: fixed;
+    z-index: 1100;
     background-color: rgba(0, 0, 0, 0.5);
     opacity: 0;
     visibility: hidden;
@@ -144,10 +155,15 @@ export default class FileUploader extends Vue {
     background: #fff;
     box-shadow: 0 40px 50px rgba(black, 0.35);
     padding: 40px;
+    -webkit-border-radius: 0.5rem;
+    -moz-border-radius: 0.5rem;
+    border-radius: 0.5rem;
 }
 #mediaFile {
     position: absolute;
     top: -1000px;
+    visibility: hidden;
+    opacity: 0;
 }
 #profile {
     border-radius: 100%;
@@ -240,6 +256,9 @@ button.submit-button {
     line-height: 40px;
     color: #fff;
     border: none;
+    -webkit-border-radius: 0.5rem;
+    -moz-border-radius: 0.5rem;
+    border-radius: 0.5rem;
     background-color: #ea4c89;
     margin-top: 50px;
     font-size: 13px;
@@ -255,7 +274,7 @@ button.close-button {
     line-height: 1.5rem;
     text-align: center;
     cursor: pointer;
-    border-radius: 0.25rem;
+    border-radius: 0.3rem;
     border-color: transparent;
     background-color: lightgray;
 }

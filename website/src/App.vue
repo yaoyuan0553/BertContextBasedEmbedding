@@ -1,6 +1,7 @@
 <template>
     <div id="app">
-        <FileUploader ref="fileUploader"/>
+<!--        <FileUploader ref="fileUploader"/>-->
+        <input id="input-id" type="file" class="file">
         <button class="open-file-uploader" @click="$refs.fileUploader.toggleMenu()">blahblah</button>
         <h1>副词语义相似度计算器</h1>
         <div class="input-div">
@@ -113,6 +114,11 @@ export default class App extends Vue {
     }
 
     public mounted() {
+
+        $('#input-id').fileinput({
+            allowedFileExtensions: ["jpg", "gif", "png", "txt"],
+            // theme: 'gly'
+        });
         // @ts-ignore
         this.$refs.computeButton.registerGlobalEnterKey();
         const ip = "http://" + window.location.hostname + ":5001/similarity_ranker";
@@ -167,7 +173,6 @@ body {
   -webkit-box-direction: normal;
   -ms-flex-direction: column;
   flex-direction: column;
-  width: 100%;
   height: 100vh;
   -webkit-box-align: center;
   -ms-flex-align: center;

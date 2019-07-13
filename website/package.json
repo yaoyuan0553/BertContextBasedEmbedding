@@ -15,7 +15,14 @@
     "echarts": "^4.2.1",
     "jquery": "^3.4.1",
     "class-transformer": "^0.2.3",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.13",
+    "@fortawesome/fontawesome-svg-core": "^1.2.19",
+    "@fortawesome/free-solid-svg-icons": "^5.9.0",
+    "@fortawesome/vue-fontawesome": "^0.1.6",
+    "font-awesome": "^4.7.0",
+    "bootstrap": "^4.3.1",
+    "bootstrap-vue": "^2.0.0-rc.26",
+    "bootstrap-fileinput": "^5.0.4"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.9.0",
@@ -23,6 +30,8 @@
     "@vue/cli-service": "^3.9.0",
     "@types/echarts": "^4.1.9",
     "@types/jquery": "^3.3.30",
+    "@types/bootstrap": "^4.3.1",
+    "@types/bootstrap-fileinput": "^0.0.7",
     "typescript": "^3.4.3",
     "vue-template-compiler": "^2.6.10",
     "sass-loader": "^7.1.0",
