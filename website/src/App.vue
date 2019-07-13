@@ -1,16 +1,18 @@
 <template>
-  <div id="app">
-    <h1>副词语义相似度计算器</h1>
-    <div class="input-div">
-      <DropdownInput ref="wordDi" class="word-di" title="词汇" placeholder="选择词汇" @keypress.enter.prevent/>
-      <DropdownInput ref="categoryDi" class="category-di" title="类别" placeholder="选择类别"/>
-      <InputBox ref="countIb" class="count-ib" title="显示数量"/>
-      <ComputeButton ref="computeButton" class="compute-button"/>
+    <div id="app">
+        <FileUploader ref="fileUploader"/>
+        <button class="open-file-uploader" @click="$refs.fileUploader.toggleMenu()">blahblah</button>
+        <h1>副词语义相似度计算器</h1>
+        <div class="input-div">
+            <DropdownInput ref="wordDi" class="word-di" title="词汇" placeholder="选择词汇" @keypress.enter.prevent/>
+            <DropdownInput ref="categoryDi" class="category-di" title="类别" placeholder="选择类别"/>
+            <InputBox ref="countIb" class="count-ib" title="显示数量"/>
+            <ComputeButton ref="computeButton" class="compute-button"/>
+        </div>
+        <SimilarityRankingGraph ref="simRankGraph"/>
+        <button @click="$refs.simRankGraph.chart.prevCategory()">Prev</button>
+        <button @click="$refs.simRankGraph.chart.nextCategory()">Next</button>
     </div>
-    <SimilarityRankingGraph ref="simRankGraph"/>
-    <button @click="$refs.simRankGraph.chart.nextCategory()">Next</button>
-    <button @click="$refs.simRankGraph.chart.prevCategory()">Prev</button>
-  </div>
 </template>
 
 <script lang="ts">
@@ -20,6 +22,7 @@ import ComputeButton from './components/ComputeButton.vue';
 import DropdownInput from './components/DropdownInput.vue';
 import SimilarityRankingGraph from './components/SimilarityRankingGraph.vue'
 import InputBox from './components/InputBox.vue';
+import FileUploader from './components/FileUploader.vue';
 
 import MessageManager from '@/ts-components/MessageManager';
 import * as Mdt from '@/ts-components/MessageDataTypes';
@@ -31,7 +34,8 @@ import { plainToClass } from 'class-transformer';
         ComputeButton,
         DropdownInput,
         SimilarityRankingGraph,
-        InputBox
+        InputBox,
+        FileUploader
     },
 })
 export default class App extends Vue {
@@ -40,8 +44,11 @@ export default class App extends Vue {
         wordDi: DropdownInput,
         categoryDi: DropdownInput,
         countIb: InputBox,
-        simRankGraph: SimilarityRankingGraph
+        simRankGraph: SimilarityRankingGraph,
+        fileUploader: FileUploader
     };
+
+    infoReceived: boolean = false;
 
     messageManager: MessageManager | undefined;
 
@@ -54,7 +61,9 @@ export default class App extends Vue {
                 this.$refs.wordDi.update(response.info.words);
                 // @ts-ignore
                 this.$refs.categoryDi.update(response.info.categories, true);
-            } else if (data.hasOwnProperty('sim_ranks')) {
+                this.infoReceived = true;
+            }
+            else if (data.hasOwnProperty('sim_ranks')) {
                 const response = plainToClass(Mdt.SimilarityRankResponse, data);
                 let words: string[] = [];
                 let sims: number[] = [];
@@ -97,6 +106,12 @@ export default class App extends Vue {
     public created() {
     }
 
+    private sendInfoRequest()
+    {
+        if (this.messageManager)
+            this.messageManager.send(new Mdt.WordCategoryInfoRequest());
+    }
+
     public mounted() {
         // @ts-ignore
         this.$refs.computeButton.registerGlobalEnterKey();
@@ -104,10 +119,16 @@ export default class App extends Vue {
         this.messageManager = new MessageManager(this.updateOnMessage, ip);
 
 
-        const infoRequest = new Mdt.WordCategoryInfoRequest();
-        console.log(infoRequest);
-
-        this.messageManager.send(infoRequest);
+        this.sendInfoRequest();
+        // retry connection to retrieve info every 10 seconds
+        const intervalId = setInterval(() => {
+            console.log('sending info request');
+            if (this.infoReceived) {
+                clearInterval(intervalId);
+                return;
+            }
+            this.sendInfoRequest();
+        }, 10000);
 
         // @ts-ignore
         this.$refs.computeButton.onCompute = () => {
