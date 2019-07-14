@@ -1,8 +1,10 @@
 <template>
     <div id="app">
-<!--        <FileUploader ref="fileUploader"/>-->
-        <input id="input-id" type="file" class="file">
-        <button class="open-file-uploader" @click="$refs.fileUploader.toggleMenu()">blahblah</button>
+        <TxtFileInput ref="txtFileInput"/>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+            blahblah
+        </button>
+<!--        <button class="open-file-uploader" @click="$refs.fileUploader.toggleMenu()">blahblah</button>-->
         <h1>副词语义相似度计算器</h1>
         <div class="input-div">
             <DropdownInput ref="wordDi" class="word-di" title="词汇" placeholder="选择词汇" @keypress.enter.prevent/>
@@ -23,7 +25,8 @@ import ComputeButton from './components/ComputeButton.vue';
 import DropdownInput from './components/DropdownInput.vue';
 import SimilarityRankingGraph from './components/SimilarityRankingGraph.vue'
 import InputBox from './components/InputBox.vue';
-import FileUploader from './components/FileUploader.vue';
+// import FileUploader from './components/FileUploader.vue';
+import TxtFileInput from './components/TxtFileInput.vue';
 
 import MessageManager from '@/ts-components/MessageManager';
 import * as Mdt from '@/ts-components/MessageDataTypes';
@@ -36,7 +39,8 @@ import { plainToClass } from 'class-transformer';
         DropdownInput,
         SimilarityRankingGraph,
         InputBox,
-        FileUploader
+        TxtFileInput
+        // FileUploader
     },
 })
 export default class App extends Vue {
@@ -46,7 +50,8 @@ export default class App extends Vue {
         categoryDi: DropdownInput,
         countIb: InputBox,
         simRankGraph: SimilarityRankingGraph,
-        fileUploader: FileUploader
+        txtFileInput: TxtFileInput
+        // fileUploader: FileUploader
     };
 
     infoReceived: boolean = false;
@@ -115,10 +120,6 @@ export default class App extends Vue {
 
     public mounted() {
 
-        $('#input-id').fileinput({
-            allowedFileExtensions: ["jpg", "gif", "png", "txt"],
-            // theme: 'gly'
-        });
         // @ts-ignore
         this.$refs.computeButton.registerGlobalEnterKey();
         const ip = "http://" + window.location.hostname + ":5001/similarity_ranker";
@@ -128,7 +129,6 @@ export default class App extends Vue {
         this.sendInfoRequest();
         // retry connection to retrieve info every 10 seconds
         const intervalId = setInterval(() => {
-            console.log('sending info request');
             if (this.infoReceived) {
                 clearInterval(intervalId);
                 return;

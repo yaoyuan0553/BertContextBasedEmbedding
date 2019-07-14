@@ -1,8 +1,8 @@
 <template>
-<!--    <div class="file-uploader">-->
+    <div class="file-uploader">
 <!--      <div class="table">-->
 <!--          <div class="table-cell">-->
-<!--              <button class="close-button" @click="toggleMenu">&times;</button>-->
+<!--        <button class="close-button" @click="toggleMenu">&times;</button>-->
 <!--              <div class="modal">-->
 <!--                  <div id="profile" @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop" @click="onClick">-->
 <!--                      <div class="dashes"></div>-->
@@ -13,8 +13,8 @@
 <!--          </div>-->
 <!--      </div>-->
 <!--      <input ref="mediaFile" @change="onMediaFileChange" type="file" id="mediaFile" />-->
-        <input id="input-id" type="file" class="file">
-<!--    </div>-->
+        <input id="input-id" type="file" class="file" accept=".txt">
+    </div>
 </template>
 
 <script lang='ts'>
@@ -99,8 +99,13 @@ export default class FileUploader extends Vue {
         }, false);*/
 
         $('#input-id').fileinput({
-            allowedFileExtensions: ["jpg", "gif", "png", "txt"],
-            theme: 'fas'
+            theme: 'fas',
+            language: 'zh',
+            previewFileType: 'text',
+            allowedFileExtensions: ["txt"],
+            maxFileCount: 1,
+            dropZoneTitle: '拖拽字典文件到这里...',
+            elErrorContainer: "#errorBlock"
         });
     }
 }
@@ -114,6 +119,7 @@ export default class FileUploader extends Vue {
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
+
 
 .file-uploader {
     width: 100%;
