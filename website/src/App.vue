@@ -1,9 +1,12 @@
 <template>
     <div id="app">
         <TxtFileInput ref="txtFileInput"/>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-            blahblah
-        </button>
+        <div style="position: absolute; left: 5%;">
+            <button type="button" class="show-upload show-upload-3 show-upload-3e" data-toggle="modal" data-target="#fileUploadModal">
+                <i class="fas fa-file-upload" style="position:absolute; right: 10%; font-size: 1.5rem;"></i>
+                <span style="font-size: 1.1rem;">上传字典</span>
+            </button>
+        </div>
 <!--        <button class="open-file-uploader" @click="$refs.fileUploader.toggleMenu()">blahblah</button>-->
         <h1>副词语义相似度计算器</h1>
         <div class="input-div">
@@ -257,6 +260,109 @@ div.input-div {
   border-radius:.25rem;
   -webkit-tap-highlight-color: rgba(0,0,0,0);
   -webkit-touch-callout: none;
+}
+
+
+.show-upload {
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    background: none;
+    cursor: pointer;
+    padding: 25px 80px;
+    display: inline-block;
+    margin: 15px 30px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    outline: none;
+    position: relative;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+    border-radius: .30rem;
+}
+
+.show-upload:after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    -webkit-transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    transition: all 0.3s;
+}
+
+/* Pseudo elements for icons */
+.show-upload:before {
+    font-family: 'icomoon',serif;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Button 3 */
+.show-upload-3 {
+    background: #fcad26;
+    color: #fff;
+}
+
+.show-upload-3:hover {
+    background: #f29e0d;
+}
+
+.show-upload-3:active {
+    background: #f58500;
+    top: 2px;
+}
+
+.show-upload-3:before {
+    position: absolute;
+    height: 100%;
+    left: 0;
+    top: 0;
+    line-height: 3;
+    font-size: 140%;
+    width: 60px;
+}
+
+/* Button 3e */
+.show-upload-3e {
+    padding: 25px 120px 25px 60px;
+    overflow: hidden;
+}
+
+.show-upload-3e:before {
+    left: auto;
+    right: 10px;
+    z-index: 2;
+}
+
+.show-upload-3e:after {
+    width: 30%;
+    height: 200%;
+    background: rgba(255,255,255,0.1);
+    z-index: 1;
+    right: 0;
+    top: 0;
+    margin: -5px 0 0 -5px;
+    -webkit-transform-origin: 0 0;
+    -webkit-transform: rotate(-20deg);
+    -moz-transform-origin: 0 0;
+    -moz-transform: rotate(-20deg);
+    -ms-transform-origin: 0 0;
+    -ms-transform: rotate(-20deg);
+    transform-origin: 0 0;
+    transform: rotate(-20deg);
+}
+
+.show-upload-3e:hover:after {
+    width: 40%;
 }
 
 </style>
