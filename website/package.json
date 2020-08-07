@@ -14,7 +14,7 @@
     "vue-property-decorator": "^8.1.0",
     "echarts": "^4.2.1",
     "jquery": "^3.4.1",
-    "class-transformer": "^0.2.3",
+    "class-transformer": "^0.3.1",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
